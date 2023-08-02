@@ -1,0 +1,29 @@
+name: Deploy to GHCR
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: 'Login to GitHub Container Registry'
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{github.actor}}
+        password: ${{secrets.GITHUB_TOKEN}}
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        REPO: ghcr.io/studsovet/elections-back
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $REPO:$IMAGE_TAG .
+        docker push $REPO:$IMAGE_TAG
+        docker tag $REPO:$IMAGE_TAG $REPO:latest
+        docker push $REPO:latest
