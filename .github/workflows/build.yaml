@@ -27,3 +27,10 @@ jobs:
         docker push $REPO:$IMAGE_TAG
         docker tag $REPO:$IMAGE_TAG $REPO:latest
         docker push $REPO:latest
+    - name: portainer
+      uses:  wirgen/portainer-stack-redeploy-action@v1.1
+      with:
+        portainerUrl: ${{ secrets.PORTAINER_URL }}
+        accessToken: ${{ secrets.PORTAINER_TOKEN }}
+        stackId: ${{ secrets.PORTAINER_STACK_ID }}}
+        endpointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
