@@ -1,0 +1,29 @@
+services:
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD} 
+    volumes:
+      - ./mounted/mongo:/data/db 
+    ports:
+      - 27017:27017
+  back:
+    build: ./back
+    restart: always
+    environment:
+      MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/
+      MONGO_USERNAME: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD} 
+      MONGO_DATABASE: ${MONGO_DATABASE}
+    command:
+      - ./app
+    ports:
+      - 8080:8080
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    
+    
