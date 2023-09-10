@@ -5,27 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"elections-back/models"
+	"elections-back/controllers"
+	db "elections-back/db"
+	middlewares "elections-back/middleware"
 )
 
-func post(c *gin.Context) {
-	t := models.Test{}
-	c.BindJSON(&t)
-	t.SaveTest()
-	c.JSON(http.StatusOK, gin.H{
-		"message": "accepted",
-	})
-}
-
-func get(c *gin.Context) {
-	t := models.GetTest()
-	c.JSON(http.StatusOK, gin.H{
-		"message": t.Test,
-	})
-}
-
 func main() {
-	models.ConnectDB()
+	db.ConnectDB()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -33,7 +19,11 @@ func main() {
 			"message": "pong",
 		})
 	})
-	r.POST("/post", post)
-	r.GET("/get", get)
+	r.POST("/register", controllers.Register)
+	r.POST("/login", controllers.Login)
+	r.GET("/votes", controllers.GetVotes)
+	protected := r.Group("/post")
+	protected.Use(middlewares.JwtAuthMiddleware())
+	protected.POST("/vote", controllers.PostVote)
 	r.Run()
 }
