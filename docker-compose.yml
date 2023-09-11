@@ -1,5 +1,6 @@
 services:
   mongodb:
+    container_name: mongodb
     image: mongo
     restart: always
     environment:
@@ -7,15 +8,32 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
       - mongodata:/data/db
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - 27017:27017
+      - 8081:8081
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
   back:
+    container_name: back
     build: ./back
     restart: always
     environment:
       MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/
       MONGO_USERNAME: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD} 
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_DATABASE: ${MONGO_DATABASE}
       API_SECRET: ${API_SECRET}
       TOKEN_HOUR_LIFESPAN: ${TOKEN_HOUR_LIFESPAN}
