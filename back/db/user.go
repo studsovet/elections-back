@@ -9,13 +9,15 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID       string `bson:"id" json"id" bindings:"required"`
-	Username string `bson:"username" json:"username" bindings:"required"`
-	Password string `bson:"password" json:"password" bindings:"required"`
+	ID         string `bson:"id" json"id" bindings:"required"`
+	Username   string `bson:"username" json:"username" bindings:"required"`
+	Password   string `bson:"password" json:"password" bindings:"required"`
+	IsObserver bool   `bson:"is_observer" json:"is_observer" bindings:"required"`
 }
 
 func (u *User) SaveUser() (*User, error) {
@@ -68,6 +70,13 @@ func LoginCheck(username string, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func CountObservers() (int, error) {
+	opts := options.Count().SetHint("_id_")
+	count, err := DB.Database("protected").Collection("auth_data").CountDocuments(context.TODO(), bson.D{{"is_observer", true}}, opts)
+
+	return int(count), err
 }
 
 func GetUserByID(id string) (User, error) {

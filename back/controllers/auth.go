@@ -45,6 +45,7 @@ func Register(c *gin.Context) {
 	u := db.User{}
 	u.Username = input.Username
 	u.Password = input.Password
+	u.IsObserver = false
 	_, err := u.SaveUser()
 
 	if err != nil {
