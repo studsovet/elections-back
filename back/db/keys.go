@@ -7,12 +7,13 @@ import (
 	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Key struct {
-	Data   string `bson:"data" json"data" bindings:"required"`
-	Type   string `bson:"type" json"type" bindings:"required"`
-	PartID int    `bson:"partid" json"partid" bindings:"required"`
+	Data   string `bson:"data" json:"data" bindings:"required"`
+	Type   string `bson:"type" json:"type" bindings:"required"`
+	PartID int    `bson:"partid" json:"partid" bindings:"required"`
 }
 
 func DropKeys() {
@@ -113,4 +114,11 @@ func PrivateKeyRecovery() error {
 	}).SaveKey()
 
 	return nil
+}
+
+func (u *Key) IsTokenExist() (bool, error) {
+	opts := options.Count().SetHint("_id_")
+	count, err := DB.Database("protected").Collection("keys_data").CountDocuments(context.TODO(), bson.D{{"type", u.Type}, {"partid", u.PartID}}, opts)
+
+	return int(count) != 1, err
 }

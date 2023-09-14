@@ -14,7 +14,7 @@ import (
 )
 
 type User struct {
-	ID         string `bson:"id" json"id" bindings:"required"`
+	ID         string `bson:"id" json:"id" bindings:"required"`
 	Username   string `bson:"username" json:"username" bindings:"required"`
 	Password   string `bson:"password" json:"password" bindings:"required"`
 	IsObserver bool   `bson:"is_observer" json:"is_observer" bindings:"required"`

@@ -4,8 +4,12 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+
 	db "elections-back/db"
+	token "elections-back/utils"
+
 	"encoding/hex"
+	"encoding/pem"
 	"log"
 	"net/http"
 
@@ -69,18 +73,81 @@ func ElectionStart(c *gin.Context) {
 	log.Println(privateParts)
 
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
+
+	db.ClearVotes()
+	db.ClearUserVotes()
+}
+
+func GetPublicKey(c *gin.Context) {
+	key, err := db.GetPublicKey()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	bKey, err := hex.DecodeString(key.Data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	pKey := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: bKey,
+	}
+
+	pem.Encode(c.Writer, pKey)
 }
 
 func SetPrivateKey(c *gin.Context) {
 	var input db.Key
+
+	userId, err := token.ExtractTokenID(c)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := db.GetUserByID(userId)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !user.IsObserver {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only observers can upload tokens!"})
+		return
+	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// TODO: make this system more secure
+	if input.Type == "public" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't change public key"})
+		return
+	}
+
+	f, err := input.IsTokenExist()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !f {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This token doesn't exist!"})
+		return
+	}
+
 	input.SaveKey()
+
+	c.JSON(http.StatusBadRequest, gin.H{"message": "OK"})
 }
 
 func PostVote(c *gin.Context) {
@@ -91,8 +158,28 @@ func PostVote(c *gin.Context) {
 		return
 	}
 
+	userId, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	f, err := db.IsUserVoted(userId, input.BallotBoxID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if f {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This user is already voted!"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "OK"})
+
 	// TODO: check user before saving vote
 	input.SaveVote()
+	db.AddUserVote(userId, input.BallotBoxID)
 }
 
 func ElectionStop(c *gin.Context) {

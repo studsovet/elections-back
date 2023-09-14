@@ -29,6 +29,7 @@ func main() {
 	protected := r.Group("/election")
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.POST("/start", controllers.ElectionStart)
+	protected.POST("/public.pem", controllers.GetPublicKey)
 	protected.POST("/setkey", controllers.SetPrivateKey)
 	protected.POST("/vote", controllers.PostVote)
 	protected.POST("/stop", controllers.ElectionStop)
