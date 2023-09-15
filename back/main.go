@@ -22,18 +22,23 @@ func main() {
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
 
-	protected_test := r.Group("/deleteme")
-	protected_test.Use(middlewares.JwtAuthMiddleware())
-	protected_test.GET("/observerCount", controllers.GetObserversCount)
-
 	protected := r.Group("/election")
 	protected.Use(middlewares.JwtAuthMiddleware())
-	protected.POST("/start", controllers.ElectionStart)
-	protected.POST("/public.pem", controllers.GetPublicKey)
-	protected.POST("/setkey", controllers.SetPrivateKey)
-	protected.POST("/vote", controllers.PostVote)
-	protected.POST("/stop", controllers.ElectionStop)
-	protected.POST("/result", controllers.ElectionResult)
+
+	adminGroup := protected.Group("/admin")
+	adminGroup.Use(middlewares.AdminAuthMiddleware())
+	adminGroup.POST("/start", controllers.ElectionStart)
+	adminGroup.POST("/stop", controllers.ElectionStop)
+	adminGroup.POST("/addobserver", controllers.AddObserver)
+
+	observerGroup := protected.Group("/observer")
+	observerGroup.Use(middlewares.ObserverAuthMiddleware())
+	observerGroup.POST("/setkey", controllers.SetPrivateKey)
+
+	voteGroup := protected.Group("/vote")
+	voteGroup.POST("/public.pem", controllers.GetPublicKey)
+	voteGroup.POST("/vote", controllers.PostVote)
+	voteGroup.POST("/result", controllers.ElectionResult)
 
 	r.Run()
 }

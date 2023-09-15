@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -89,22 +88,18 @@ func DecodeVotes() {
 	SetStatus(3, "Votes are decoded!")
 }
 
-func GetVotes() ([]Vote, error) {
-	/*
-		coll := DB.Database("public").Collection("votes")
-		cursor, err := coll.Find(context.TODO(), bson.D{{}})
-		if err != nil {
-			return []Vote{}, err
-		}
-		var votes []Vote
-		err = cursor.All(context.TODO(), &votes)
-		if err != nil {
-			return []Vote{}, err
-		}
-		return votes, nil
-	*/
-
-	return []Vote{}, errors.New("GetVotes is unavalible")
+func GetVotes() ([]DecryptedVote, error) {
+	coll := DB.Database("public").Collection("decoded_votes")
+	cursor, err := coll.Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		return []DecryptedVote{}, err
+	}
+	var votes []DecryptedVote
+	err = cursor.All(context.TODO(), &votes)
+	if err != nil {
+		return []DecryptedVote{}, err
+	}
+	return votes, nil
 }
 
 func ClearVotes() {

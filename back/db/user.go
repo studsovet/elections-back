@@ -23,15 +23,23 @@ type User struct {
 
 func (u *User) SaveUser() (*User, error) {
 	var err error
-	err = u.BeforeSave()
+
+	_, err = GetUserByID(u.ID)
+
 	if err != nil {
-		return &User{}, err
+		err = u.BeforeSave()
+		if err != nil {
+			return &User{}, err
+		}
+		_, err = DB.Database("protected").Collection("auth_data").InsertOne(context.TODO(), u)
+		if err != nil {
+			return &User{}, err
+		}
+		return u, nil
+	} else {
+		DB.Database("protected").Collection("auth_data").FindOneAndUpdate(context.TODO(), bson.D{{"id", u.ID}}, bson.D{{"is_observer", u.IsObserver}, {"is_admin", u.IsAdmin}})
+		return u, nil
 	}
-	_, err = DB.Database("protected").Collection("auth_data").InsertOne(context.TODO(), u)
-	if err != nil {
-		return &User{}, err
-	}
-	return u, nil
 }
 
 func (u *User) BeforeSave() error {
