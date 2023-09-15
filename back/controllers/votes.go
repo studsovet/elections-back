@@ -3,18 +3,25 @@ package controllers
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 
 	db "elections-back/db"
 	token "elections-back/utils"
 
 	"encoding/hex"
+	"encoding/json"
 	"encoding/pem"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+type VoteInput struct {
+	Vote        interface{} `bson:"vote" json:"vote" bindings:"required"`
+	BallotBoxID int         `bson:"ballotid" json:"ballotid" bindings:"required"`
+}
 
 func ElectionStart(c *gin.Context) {
 	// Create RSE private and public key
@@ -76,6 +83,7 @@ func ElectionStart(c *gin.Context) {
 
 	db.ClearVotes()
 	db.ClearUserVotes()
+	db.SetStatus(0, "Election started")
 }
 
 func GetPublicKey(c *gin.Context) {
@@ -132,6 +140,10 @@ func SetPrivateKey(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't change public key"})
 		return
 	}
+	if input.PartID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't change composed private key"})
+		return
+	}
 
 	f, err := input.IsTokenExist()
 
@@ -147,17 +159,31 @@ func SetPrivateKey(c *gin.Context) {
 
 	input.SaveKey()
 
-	c.JSON(http.StatusBadRequest, gin.H{"message": "OK"})
+	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
 
 func PostVote(c *gin.Context) {
-	var input db.Vote
+	var input VoteInput
+	var vote db.Vote
 
+	// Try to parse user data
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Println(input.Vote)
+
+	// Check: is election running?
+	status := db.GetLastStatus()
+	log.Println(status)
+
+	if status.Code != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You can't vote now!"})
+		return
+	}
+
+	// Check: is user already voted?
 	userId, err := token.ExtractTokenID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -175,10 +201,38 @@ func PostVote(c *gin.Context) {
 		return
 	}
 
+	// Encode user vote
+	voteString, err := json.Marshal(input.Vote)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	key, err := db.GetParsedPublicKey()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	voteEncoded, err := rsa.EncryptOAEP(
+		sha256.New(),
+		rand.Reader,
+		key,
+		[]byte(voteString),
+		nil,
+	)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	vote.BallotBoxID = input.BallotBoxID
+	vote.Data = hex.EncodeToString(voteEncoded)
+
 	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 
-	// TODO: check user before saving vote
-	input.SaveVote()
+	// Save vote
+	vote.SaveVote()
 	db.AddUserVote(userId, input.BallotBoxID)
 }
 
@@ -190,10 +244,19 @@ func ElectionStop(c *gin.Context) {
 		return
 	}
 
-	// TODO: stop receiving votes and sum up the election result
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	db.SetStatus(1, "Election stoped.")
+	go db.DecodeVotes()
 }
 
 func ElectionResult(c *gin.Context) {
-	// TODO: send election result
+	// TODO: count votes
+	res, err := db.GetVotes()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"votes": res})
 }

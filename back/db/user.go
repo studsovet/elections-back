@@ -18,6 +18,7 @@ type User struct {
 	Username   string `bson:"username" json:"username" bindings:"required"`
 	Password   string `bson:"password" json:"password" bindings:"required"`
 	IsObserver bool   `bson:"is_observer" json:"is_observer" bindings:"required"`
+	IsAdmin    bool   `bson:"is_admin" json:"is_admin" bindings:"required"`
 }
 
 func (u *User) SaveUser() (*User, error) {

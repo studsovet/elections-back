@@ -2,7 +2,12 @@ package db
 
 import (
 	"context"
+	"crypto"
+	"crypto/rsa"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -10,6 +15,11 @@ import (
 type Vote struct {
 	Data        string `bson:"data" json:"data" bindings:"required"`
 	BallotBoxID int    `bson:"ballotid" json:"ballotid" bindings:"required"`
+}
+
+type DecryptedVote struct {
+	Data        map[string]interface{} `bson:"data" json:"data" bindings:"required"`
+	BallotBoxID int                    `bson:"ballotid" json:"ballotid" bindings:"required"`
 }
 
 type VoteUserInfo struct {
@@ -27,6 +37,56 @@ func (v *Vote) SaveVote() (*Vote, error) {
 	}
 
 	return v, nil
+}
+
+func DecodeVotes() {
+	SetStatus(2, "Votes are being decoded now!")
+
+	cursor, err := DB.Database("public").Collection("votes").Find(context.TODO(), bson.D{})
+	if err != nil {
+		SetStatus(-1, "Votes can't be decoded! Error: "+err.Error())
+		return
+	}
+
+	privateKey, err := GetParsedPrivateKey()
+	if err != nil {
+		SetStatus(-1, "Votes can't be decoded! Error: "+err.Error())
+		return
+	}
+
+	for cursor.Next(context.TODO()) {
+		var tmp map[string]interface{}
+
+		var encVote Vote
+		cursor.Decode(&encVote)
+
+		encByteData, err := hex.DecodeString(encVote.Data)
+		if err != nil {
+			log.Println("Error in decripting. Error: " + err.Error())
+			continue
+		}
+
+		data, err := privateKey.Decrypt(nil, encByteData, &rsa.OAEPOptions{Hash: crypto.SHA256})
+		if err != nil {
+			log.Println("Error in decripting. Error: " + err.Error())
+			continue
+		}
+
+		log.Println(string(data))
+
+		json.Unmarshal(data, &tmp)
+
+		log.Println(tmp)
+
+		decVote := DecryptedVote{
+			Data:        tmp,
+			BallotBoxID: encVote.BallotBoxID,
+		}
+
+		DB.Database("public").Collection("decoded_votes").InsertOne(context.Background(), decVote)
+	}
+
+	SetStatus(3, "Votes are decoded!")
 }
 
 func GetVotes() ([]Vote, error) {
@@ -49,6 +109,7 @@ func GetVotes() ([]Vote, error) {
 
 func ClearVotes() {
 	DB.Database("public").Collection("votes").Drop(context.TODO())
+	DB.Database("public").Collection("decoded_votes").Drop(context.TODO())
 }
 
 func AddUserVote(userId string, ballotBox int) error {

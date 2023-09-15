@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/hex"
 	"errors"
@@ -52,10 +53,55 @@ func GetPublicKey() (Key, error) {
 	return k, err
 }
 
+func GetParsedPublicKey() (*rsa.PublicKey, error) {
+	key, err := GetPublicKey()
+
+	if err != nil {
+		return &rsa.PublicKey{}, err
+	}
+
+	bKey, err := hex.DecodeString(key.Data)
+
+	if err != nil {
+		return &rsa.PublicKey{}, err
+	}
+
+	tkey, err := x509.ParsePKIXPublicKey(bKey)
+
+	if err != nil {
+		return &rsa.PublicKey{}, err
+	}
+
+	publicKey, ok := tkey.(*rsa.PublicKey)
+
+	if ok {
+		return publicKey, err
+	} else {
+		return &rsa.PublicKey{}, errors.New("can't parse public key")
+	}
+}
+
 func GetPrivateKey() (Key, error) {
 	k := Key{}
 	err := DB.Database("protected").Collection("keys_data").FindOne(context.TODO(), bson.D{{"type", "private"}, {"partid", 0}}).Decode(&k)
 	return k, err
+}
+
+func GetParsedPrivateKey() (*rsa.PrivateKey, error) {
+	key, err := GetPrivateKey()
+
+	if err != nil {
+		return &rsa.PrivateKey{}, err
+	}
+
+	bKey, err := hex.DecodeString(key.Data)
+
+	if err != nil {
+		return &rsa.PrivateKey{}, err
+	}
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(bKey)
+	return privateKey, err
 }
 
 func PrivateKeyRecovery() error {
@@ -120,5 +166,5 @@ func (u *Key) IsTokenExist() (bool, error) {
 	opts := options.Count().SetHint("_id_")
 	count, err := DB.Database("protected").Collection("keys_data").CountDocuments(context.TODO(), bson.D{{"type", u.Type}, {"partid", u.PartID}}, opts)
 
-	return int(count) != 1, err
+	return int(count) > 0, err
 }
