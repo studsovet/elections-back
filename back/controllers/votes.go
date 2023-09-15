@@ -128,5 +128,5 @@ func ElectionResult(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, gin.H{"votes": res})
+	c.JSON(http.StatusOK, gin.H{"votes": res})
 }
