@@ -21,14 +21,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := db.LoginCheck(input.Username, input.Password)
+	t, err := db.LoginCheck(input.Username, input.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	token.SetTokenCookie(c, t)
+	c.JSON(http.StatusOK, gin.H{"token": t})
 }
 
 type RegisterInput struct {

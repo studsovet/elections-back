@@ -39,7 +39,21 @@ func TokenValid(c *gin.Context) error {
 	return nil
 }
 
+func SetTokenCookie(c *gin.Context, token string) {
+	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
+	if err != nil {
+		return
+	}
+	c.SetCookie("token", token, token_lifespan*3600, "/", "localhost", false, false)
+}
+
 func ExtractToken(c *gin.Context) string {
+	cookie, err := c.Cookie("token")
+
+	if err == nil {
+		return cookie
+	}
+
 	token := c.Query("token")
 	if token != "" {
 		return token
