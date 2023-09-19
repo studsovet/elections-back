@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -89,6 +90,12 @@ func DecodeVotes() {
 }
 
 func GetVotes() ([]DecryptedVote, error) {
+	status := GetLastStatus()
+
+	if status.Code != 3 {
+		return []DecryptedVote{}, errors.New("Votes are encoded!");
+	}
+
 	coll := DB.Database("public").Collection("decoded_votes")
 	cursor, err := coll.Find(context.TODO(), bson.D{{}})
 	if err != nil {

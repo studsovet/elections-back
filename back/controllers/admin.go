@@ -12,15 +12,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AddingObserver struct {
+type AddObserverInput struct {
 	ID string `bson:"id" json:"id" bindings:"required"`
 }
 
 func ElectionStart(c *gin.Context) {
+	status := db.GetLastStatus()
+
+	if status.Code == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Vote is already running!"})
+		return
+	}
+
 	// Create RSE private and public key
 	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	publickey := &privatekey.PublicKey
@@ -28,7 +35,7 @@ func ElectionStart(c *gin.Context) {
 	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privatekey)
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publickey)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -39,7 +46,7 @@ func ElectionStart(c *gin.Context) {
 	// Private key separation
 	n, err := db.CountObservers()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -80,20 +87,27 @@ func ElectionStart(c *gin.Context) {
 }
 
 func ElectionStop(c *gin.Context) {
-	err := db.PrivateKeyRecovery()
+	status := db.GetLastStatus()
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if status.Code != 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Vote is not running!"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	err := db.PrivateKeyRecovery()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "in progress"})
 	db.SetStatus(1, "Election stoped.")
 	go db.DecodeVotes()
 }
 
 func AddObserver(c *gin.Context) {
-	var input AddingObserver
+	var input AddObserverInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -103,7 +117,7 @@ func AddObserver(c *gin.Context) {
 	user, err := db.GetUserByID(input.ID)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

@@ -14,19 +14,19 @@ func SetPrivateKey(c *gin.Context) {
 	userId, err := token.ExtractTokenID(c)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, err := db.GetUserByID(userId)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	if !user.IsObserver {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only observers can upload tokens!"})
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Only observers can upload tokens!"})
 		return
 	}
 

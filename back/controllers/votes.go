@@ -26,14 +26,14 @@ func GetPublicKey(c *gin.Context) {
 	key, err := db.GetPublicKey()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	bKey, err := hex.DecodeString(key.Data)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -69,7 +69,7 @@ func PostVote(c *gin.Context) {
 	// Check: is user already voted?
 	userId, err := token.ExtractTokenID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -87,13 +87,13 @@ func PostVote(c *gin.Context) {
 	// Encode user vote
 	voteString, err := json.Marshal(input.Vote)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	key, err := db.GetParsedPublicKey()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -105,7 +105,7 @@ func PostVote(c *gin.Context) {
 		nil,
 	)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -120,6 +120,13 @@ func PostVote(c *gin.Context) {
 }
 
 func ElectionResult(c *gin.Context) {
+	status := db.GetLastStatus()
+
+	if status.Code != 3 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Votes are encoded!"})
+		return
+	}
+
 	// TODO: count votes
 	res, err := db.GetVotes()
 
