@@ -15,6 +15,7 @@ type Key struct {
 	Data   string `bson:"data" json:"data" bindings:"required"`
 	Type   string `bson:"type" json:"type" bindings:"required"`
 	PartID int    `bson:"partid" json:"partid" bindings:"required"`
+	Owner  string `bson:"ownerid" json:"ownerid" bindings:"required"`
 }
 
 func DropKeys() {
@@ -84,6 +85,12 @@ func GetParsedPublicKey() (*rsa.PublicKey, error) {
 func GetPrivateKey() (Key, error) {
 	k := Key{}
 	err := DB.Database("protected").Collection("keys_data").FindOne(context.TODO(), bson.D{{"type", "private"}, {"partid", 0}}).Decode(&k)
+	return k, err
+}
+
+func GetPrivateKeyPart(n int) (Key, error) {
+	k := Key{}
+	err := DB.Database("protected").Collection("keys_data").FindOne(context.TODO(), bson.D{{"type", "private"}, {"partid", n}}).Decode(&k)
 	return k, err
 }
 

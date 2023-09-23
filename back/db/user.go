@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -81,11 +80,13 @@ func LoginCheck(username string, password string) (string, error) {
 	return token, nil
 }
 
-func CountObservers() (int, error) {
-	opts := options.Count().SetHint("_id_")
-	count, err := DB.Database("protected").Collection("auth_data").CountDocuments(context.TODO(), bson.D{{"is_observer", true}}, opts)
+func CountObservers() ([]User, error) {
+	var res []User
 
-	return int(count), err
+	cursor, err := DB.Database("protected").Collection("auth_data").Find(context.TODO(), bson.D{{"is_observer", true}})
+	cursor.All(context.TODO(), res)
+
+	return res, err
 }
 
 func GetUserByID(id string) (User, error) {

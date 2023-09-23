@@ -11,6 +11,13 @@ import (
 func SetPrivateKey(c *gin.Context) {
 	var input db.Key
 
+	status := db.GetLastStatus()
+
+	if status.Code != 1 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Vote is not stopped!"})
+		return
+	}
+
 	userId, err := token.ExtractTokenID(c)
 
 	if err != nil {
@@ -53,6 +60,17 @@ func SetPrivateKey(c *gin.Context) {
 
 	if !f {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "This token doesn't exist!"})
+		return
+	}
+
+	key, err := db.GetPrivateKeyPart(input.PartID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if key.Owner != user.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can't change THIS public key"})
 		return
 	}
 

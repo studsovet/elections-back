@@ -44,7 +44,9 @@ func ElectionStart(c *gin.Context) {
 	publicKeyHex := hex.EncodeToString(publicKeyBytes)
 
 	// Private key separation
-	n, err := db.CountObservers()
+	observers, err := db.CountObservers()
+	n := len(observers)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,6 +63,7 @@ func ElectionStart(c *gin.Context) {
 			Data:   "",
 			Type:   "private",
 			PartID: i,
+			Owner:  observers[i-1].ID,
 		}).SaveKey()
 	}
 	privateParts[n-1] = privateKeyHex[(n-1)*partSize:]
@@ -68,6 +71,7 @@ func ElectionStart(c *gin.Context) {
 		Data:   "",
 		Type:   "private",
 		PartID: n,
+		Owner:  observers[n-1].ID,
 	}).SaveKey()
 
 	(&db.Key{
@@ -94,6 +98,18 @@ func ElectionStop(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"message": "in progress"})
+	db.SetStatus(1, "Election stoped.")
+}
+
+func PrivateKeyRecovery(c *gin.Context) {
+	status := db.GetLastStatus()
+
+	if status.Code != 1 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Vote is not stopped!"})
+		return
+	}
+
 	err := db.PrivateKeyRecovery()
 
 	if err != nil {
@@ -101,8 +117,6 @@ func ElectionStop(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "in progress"})
-	db.SetStatus(1, "Election stoped.")
 	go db.DecodeVotes()
 }
 

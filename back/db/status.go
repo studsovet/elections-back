@@ -31,7 +31,13 @@ func GetLastStatus() Status {
 	sort := bson.D{{"time", -1}}
 	opts := options.FindOne().SetSort(sort)
 
-	DB.Database("public").Collection("status").FindOne(context.TODO(), bson.D{}, opts).Decode(&s)
+	err := DB.Database("public").Collection("status").FindOne(context.TODO(), bson.D{}, opts).Decode(&s)
+
+	if err != nil {
+		return Status{
+			Code: -1,
+		}
+	}
 
 	return s
 }

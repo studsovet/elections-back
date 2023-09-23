@@ -119,6 +119,38 @@ func PostVote(c *gin.Context) {
 	db.AddUserVote(userId, input.BallotBoxID)
 }
 
+func PostEncryptedVote(c *gin.Context) {
+	var vote db.Vote
+
+	// Try to parse user data
+	if err := c.ShouldBindJSON(&vote); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check: is user already voted?
+	userId, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	f, err := db.IsUserVoted(userId, vote.BallotBoxID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if f {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This user is already voted!"})
+		return
+	}
+
+	// Save vote
+	vote.SaveVote()
+	db.AddUserVote(userId, vote.BallotBoxID)
+}
+
 func ElectionResult(c *gin.Context) {
 	status := db.GetLastStatus()
 

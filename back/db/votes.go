@@ -93,7 +93,7 @@ func GetVotes() ([]DecryptedVote, error) {
 	status := GetLastStatus()
 
 	if status.Code != 3 {
-		return []DecryptedVote{}, errors.New("Votes are encoded!");
+		return []DecryptedVote{}, errors.New("Votes are encoded!")
 	}
 
 	coll := DB.Database("public").Collection("decoded_votes")

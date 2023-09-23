@@ -29,6 +29,7 @@ func main() {
 	adminGroup.Use(middlewares.AdminAuthMiddleware())
 	adminGroup.POST("/start", controllers.ElectionStart)
 	adminGroup.POST("/stop", controllers.ElectionStop)
+	adminGroup.POST("/recovery", controllers.PrivateKeyRecovery)
 	adminGroup.POST("/addobserver", controllers.AddObserver)
 
 	observerGroup := protected.Group("/observer")
@@ -38,6 +39,7 @@ func main() {
 	voteGroup := protected.Group("/vote")
 	voteGroup.POST("/public.pem", controllers.GetPublicKey)
 	voteGroup.POST("/vote", controllers.PostVote)
+	voteGroup.POST("/voteencrypted", controllers.PostEncryptedVote)
 	voteGroup.POST("/result", controllers.ElectionResult)
 
 	r.Run()
