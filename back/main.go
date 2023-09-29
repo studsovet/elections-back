@@ -38,10 +38,10 @@ func main() {
 	observerGroup.POST("/setkey", controllers.SetPrivateKey)
 
 	voteGroup := protected.Group("/vote")
-	voteGroup.POST("/public.pem", controllers.GetPublicKey)
+	voteGroup.GET("/public.pem", controllers.GetPublicKey)
 	voteGroup.POST("/vote", controllers.PostVote)
 	voteGroup.POST("/voteencrypted", controllers.PostEncryptedVote)
-	voteGroup.POST("/result", controllers.ElectionResult)
+	voteGroup.GET("/result", controllers.ElectionResult)
 	voteGroup.GET("/getcandidates", controllers.GetCandidates)
 
 	r.Run()
