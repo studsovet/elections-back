@@ -21,6 +21,7 @@ func main() {
 	})
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
+	r.POST("/login/callback", controllers.LoginCallback)
 	r.GET("/votes", controllers.GetVotes)
 	protected := r.Group("/post")
 	protected.Use(middlewares.JwtAuthMiddleware())
