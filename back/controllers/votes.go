@@ -169,3 +169,7 @@ func ElectionResult(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"votes": res})
 }
+
+func ElectionNotImplemented(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented!"})
+}

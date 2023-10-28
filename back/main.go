@@ -19,6 +19,9 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	// Old handlers
+
 	r.POST("/register", controllers.Register)
 	r.POST("/login", controllers.Login)
 
@@ -43,6 +46,44 @@ func main() {
 	voteGroup.POST("/voteencrypted", controllers.PostEncryptedVote)
 	voteGroup.GET("/result", controllers.ElectionResult)
 	voteGroup.GET("/getcandidates", controllers.GetCandidates)
+
+	// New handlers
+
+	authGroup := r.Group("/auth")
+
+	// auth
+	authGroup.GET("/elk", controllers.ElectionNotImplemented)
+	authGroup.POST("/redirect", controllers.ElectionNotImplemented)
+
+	electionsGroup := r.Group("/elections")
+
+	// elector
+	electionsGroup.POST("/becomeCandidate/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/myCandidateStatus/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/all", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/get", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getCandidates/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getVoices/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getResults/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/vote/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/publicKey/:electionId", controllers.ElectionNotImplemented)
+
+	// observer
+	electionsGroup.POST("/setPrivateKey/:electionId", controllers.ElectionNotImplemented)
+
+	// admin
+	electionsGroup.POST("/setPublicKey/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/create", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/approveCandidate/:candidateId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/next/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getAllCandidates", controllers.ElectionNotImplemented)
+
+	dictionariesGroup := r.Group("/dictionaries")
+
+	// dictionary
+	dictionariesGroup.GET("/councilOrganizations", controllers.ElectionNotImplemented)
+	dictionariesGroup.GET("/faculty", controllers.ElectionNotImplemented)
+	dictionariesGroup.GET("/dormitory", controllers.ElectionNotImplemented)
 
 	r.Run()
 }
