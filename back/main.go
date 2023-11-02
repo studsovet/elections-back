@@ -62,7 +62,7 @@ func main() {
 	electionsGroup.GET("/myCandidateStatus/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/all", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/get", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/getCandidates/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getCandidates/:electionId", controllers.GetCandidates)
 	electionsGroup.GET("/getVoices/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/getResults/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.POST("/vote/:electionId", controllers.ElectionNotImplemented)

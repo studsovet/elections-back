@@ -6,13 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type Candidate struct {
-	Name     string `bson:"name" json:"name" bindings:"required"`
-	Surname  string `bson:"surname" json:"surname" bindings:"required"`
-	Program  string `bson:"program" json:"program" bindings:"required"`
-	PhotoUrl string `bson:"photourl" json:"photourl" bindings:"required"`
-}
-
 func GetCandidates(userId string) ([]Candidate, error) {
 	//TODO надо смотреть на userId и выдавать только нужных кандидатов
 	coll := DB.Database("public").Collection("candidates")
