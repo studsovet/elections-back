@@ -50,6 +50,16 @@ type ElectionResults struct {
 	// TODO
 }
 
+type Candidate struct {
+	ID                int64  `bson:"id" json:"id" bindings:"required"`
+	ElectionId        int64  `bson:"electionId" json:"electionId" bindings:"required"`
+	Name              string `bson:"name" json:"name" bindings:"required"`
+	PhotoUrl          string `bson:"photourl" json:"photourl" bindings:"required"`
+	Description       string `bson:"description" json:"description" bindings:"required"`
+	Approved          bool   `bson:"approved" json:"approved" bindings:"required"`
+	WaitingForApprove bool   `bson:"waitingForApprove" json:"waitingForApprove"`
+}
+
 type CandidateRequest struct {
 	Name        string `bson:"name" json:"name" bindings:"required"`
 	PhotoUrl    string `bson:"photourl" json:"photourl" bindings:"required"`
