@@ -1,16 +1,8 @@
 package db
 
-import (
-	"context"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/hex"
-	"errors"
+import "context"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
-
+/*
 type Key struct {
 	Data   string `bson:"data" json:"data" bindings:"required"`
 	Type   string `bson:"type" json:"type" bindings:"required"`
@@ -174,4 +166,10 @@ func (u *Key) IsTokenExist() (bool, error) {
 	count, err := DB.Database("protected").Collection("keys_data").CountDocuments(context.TODO(), bson.D{{"type", u.Type}, {"partid", u.PartID}}, opts)
 
 	return int(count) > 0, err
+}
+*/
+
+func (k *PublicKey) Save() (*PublicKey, error) {
+	_, err := DB.Database("public").Collection("public_keys").InsertOne(context.TODO(), k)
+	return k, err
 }

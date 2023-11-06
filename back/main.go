@@ -7,7 +7,6 @@ import (
 
 	"elections-back/controllers"
 	db "elections-back/db"
-	middlewares "elections-back/middleware"
 )
 
 func main() {
@@ -21,31 +20,32 @@ func main() {
 	})
 
 	// Old handlers
+	/*
+		r.POST("/register", controllers.Register)
+		r.POST("/login", controllers.Login)
 
-	r.POST("/register", controllers.Register)
-	r.POST("/login", controllers.Login)
+		protected := r.Group("/election")
+		protected.Use(middlewares.JwtAuthMiddleware())
 
-	protected := r.Group("/election")
-	protected.Use(middlewares.JwtAuthMiddleware())
+		adminGroup := protected.Group("/admin")
+		adminGroup.Use(middlewares.AdminAuthMiddleware())
+		adminGroup.POST("/start", controllers.ElectionStart)
+		adminGroup.POST("/stop", controllers.ElectionStop)
+		adminGroup.POST("/recovery", controllers.PrivateKeyRecovery)
+		adminGroup.POST("/addobserver", controllers.AddObserver)
+		adminGroup.POST("/addcandidate", controllers.AddCandidate)
 
-	adminGroup := protected.Group("/admin")
-	adminGroup.Use(middlewares.AdminAuthMiddleware())
-	adminGroup.POST("/start", controllers.ElectionStart)
-	adminGroup.POST("/stop", controllers.ElectionStop)
-	adminGroup.POST("/recovery", controllers.PrivateKeyRecovery)
-	adminGroup.POST("/addobserver", controllers.AddObserver)
-	adminGroup.POST("/addcandidate", controllers.AddCandidate)
+		observerGroup := protected.Group("/observer")
+		observerGroup.Use(middlewares.ObserverAuthMiddleware())
+		observerGroup.POST("/setkey", controllers.SetPrivateKey)
 
-	observerGroup := protected.Group("/observer")
-	observerGroup.Use(middlewares.ObserverAuthMiddleware())
-	observerGroup.POST("/setkey", controllers.SetPrivateKey)
-
-	voteGroup := protected.Group("/vote")
-	voteGroup.GET("/public.pem", controllers.GetPublicKey)
-	voteGroup.POST("/vote", controllers.PostVote)
-	voteGroup.POST("/voteencrypted", controllers.PostEncryptedVote)
-	voteGroup.GET("/result", controllers.ElectionResult)
-	voteGroup.GET("/getcandidates", controllers.GetCandidates)
+		voteGroup := protected.Group("/vote")
+		voteGroup.GET("/public.pem", controllers.GetPublicKey)
+		voteGroup.POST("/vote", controllers.PostVote)
+		voteGroup.POST("/voteencrypted", controllers.PostEncryptedVote)
+		voteGroup.GET("/result", controllers.ElectionResult)
+		voteGroup.GET("/getcandidates", controllers.GetCandidates)
+	*/
 
 	// New handlers
 
@@ -62,7 +62,7 @@ func main() {
 	electionsGroup.GET("/myCandidateStatus/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/all", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/get", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/getCandidates/:electionId", controllers.GetCandidates)
+	electionsGroup.GET("/getCandidates/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/getVoices/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.GET("/getResults/:electionId", controllers.ElectionNotImplemented)
 	electionsGroup.POST("/vote/:electionId", controllers.ElectionNotImplemented)
@@ -72,11 +72,11 @@ func main() {
 	electionsGroup.POST("/setPrivateKey/:electionId", controllers.ElectionNotImplemented)
 
 	// admin
-	electionsGroup.POST("/setPublicKey/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.POST("/create", controllers.ElectionNotImplemented)
-	electionsGroup.POST("/approveCandidate/:candidateId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/next/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/getAllCandidates", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)
+	electionsGroup.POST("/create", controllers.CreateElection)
+	electionsGroup.POST("/approveCandidate/:candidateId", controllers.ApproveCandidate)
+	electionsGroup.POST("/next/:electionId", controllers.Next)
+	electionsGroup.GET("/getAllCandidates", controllers.GetAllCandidates)
 
 	dictionariesGroup := r.Group("/dictionaries")
 

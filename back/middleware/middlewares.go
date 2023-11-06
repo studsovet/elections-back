@@ -1,14 +1,6 @@
 package middlewares
 
-import (
-	"net/http"
-
-	"elections-back/db"
-	token "elections-back/utils"
-
-	"github.com/gin-gonic/gin"
-)
-
+/*
 func JwtAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := token.TokenValid(c)
@@ -72,3 +64,4 @@ func ObserverAuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+*/

@@ -1,13 +1,6 @@
 package controllers
 
-import (
-	db "elections-back/db"
-	token "elections-back/utils"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
+/*
 func AddCandidate(c *gin.Context) {
 	var candidate db.Candidate
 	if err := c.ShouldBindJSON(&candidate); err != nil {
@@ -35,3 +28,4 @@ func GetCandidates(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"candidates": candidates})
 }
+*/

@@ -1,13 +1,6 @@
 package controllers
 
-import (
-	db "elections-back/db"
-	token "elections-back/utils"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
+/*
 type LoginInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -70,3 +63,4 @@ func GetCurrentUser(c *gin.Context) (db.User, error) {
 	}
 	return u, nil
 }
+*/

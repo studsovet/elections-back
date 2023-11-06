@@ -1,17 +1,6 @@
 package db
 
-import (
-	"context"
-	"crypto"
-	"crypto/rsa"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"log"
-
-	"go.mongodb.org/mongo-driver/bson"
-)
-
+/*
 type Vote struct {
 	Data        string `bson:"data" json:"data" bindings:"required"`
 	BallotBoxID int    `bson:"ballotid" json:"ballotid" bindings:"required"`
@@ -160,3 +149,4 @@ func IsUserVoted(userId string, ballotId int) (bool, error) {
 func ClearUserVotes() {
 	DB.Database("public").Collection("users_votes").Drop(context.TODO())
 }
+*/

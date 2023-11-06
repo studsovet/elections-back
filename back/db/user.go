@@ -1,17 +1,6 @@
 package db
 
-import (
-	"context"
-	"html"
-	"strings"
-
-	token "elections-back/utils"
-
-	"github.com/google/uuid"
-	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/crypto/bcrypt"
-)
-
+/*
 type User struct {
 	ID         string `bson:"id" json:"id" bindings:"required"`
 	Username   string `bson:"username" json:"username" bindings:"required"`
@@ -94,3 +83,4 @@ func GetUserByID(id string) (User, error) {
 	err := DB.Database("protected").Collection("auth_data").FindOne(context.TODO(), bson.D{{"id", id}}).Decode(&u)
 	return u, err
 }
+*/

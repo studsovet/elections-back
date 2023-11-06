@@ -1,22 +1,12 @@
 package controllers
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
-
-	db "elections-back/db"
-	token "elections-back/utils"
-
-	"encoding/hex"
-	"encoding/json"
-	"encoding/pem"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+/*
 type VoteInput struct {
 	Vote        interface{} `bson:"vote" json:"vote" bindings:"required"`
 	BallotBoxID int         `bson:"ballotid" json:"ballotid" bindings:"required"`
@@ -169,7 +159,7 @@ func ElectionResult(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"votes": res})
 }
-
+*/
 func ElectionNotImplemented(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented!"})
 }

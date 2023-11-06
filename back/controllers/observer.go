@@ -1,13 +1,6 @@
 package controllers
 
-import (
-	db "elections-back/db"
-	token "elections-back/utils"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
+/*
 func SetPrivateKey(c *gin.Context) {
 	var input db.Key
 
@@ -78,3 +71,4 @@ func SetPrivateKey(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
+*/
