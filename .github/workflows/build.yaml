@@ -26,11 +26,12 @@ jobs:
         REPO: ghcr.io/studsovet/elections-back
         IMAGE_TAG: ${{ steps.extract_branch.outputs.branch }}-${{ github.sha }}
       run: |
-        docker build -t $REPO:$IMAGE_TAG .
+        docker build -t $REPO:$IMAGE_TAG ./back
         docker push $REPO:$IMAGE_TAG
         docker tag $REPO:$IMAGE_TAG $REPO:latest
         docker tag $REPO:${{ steps.extract_branch.outputs.branch }}
         docker push $REPO:latest
+        docker push $REPO:${{ steps.extract_branch.outputs.branch }}
     - name: portainer
       uses:  wirgen/portainer-stack-redeploy-action@v1.1
       with:
