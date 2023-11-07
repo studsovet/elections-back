@@ -29,7 +29,7 @@ jobs:
         docker build -t $REPO:$IMAGE_TAG ./back
         docker push $REPO:$IMAGE_TAG
         docker tag $REPO:$IMAGE_TAG $REPO:latest
-        docker tag $REPO:${{ steps.extract_branch.outputs.branch }}
+        docker tag $REPO:$IMAGE_TAG $REPO:${{ steps.extract_branch.outputs.branch }}
         docker push $REPO:latest
         docker push $REPO:${{ steps.extract_branch.outputs.branch }}
     - name: portainer
