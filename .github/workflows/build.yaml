@@ -23,7 +23,7 @@ jobs:
         REPO: ghcr.io/studsovet/elections-back
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $REPO:$IMAGE_TAG .
+        docker build -t $REPO:$IMAGE_TAG ./back
         docker push $REPO:$IMAGE_TAG
         docker tag $REPO:$IMAGE_TAG $REPO:latest
         docker push $REPO:latest
