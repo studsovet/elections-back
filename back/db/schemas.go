@@ -50,19 +50,13 @@ type ElectionResults struct {
 }
 
 type Candidate struct {
-	ID                string `bson:"id" json:"id" bindings:"required"`
-	ElectionId        int64  `bson:"electionId" json:"electionId" bindings:"required"`
+	ID                string `bson:"id" json:"id"`
+	ElectionId        string `bson:"electionId" json:"electionId"`
 	Name              string `bson:"name" json:"name" bindings:"required"`
 	PhotoUrl          string `bson:"photourl" json:"photourl" bindings:"required"`
 	Description       string `bson:"description" json:"description" bindings:"required"`
-	Approved          bool   `bson:"approved" json:"approved" bindings:"required"`
+	Approved          bool   `bson:"approved" json:"approved"`
 	WaitingForApprove bool   `bson:"waitingForApprove" json:"waitingForApprove"`
-}
-
-type CandidateRequest struct {
-	Name        string `bson:"name" json:"name" bindings:"required"`
-	PhotoUrl    string `bson:"photourl" json:"photourl" bindings:"required"`
-	Description string `bson:"description" json:"description" bindings:"required"`
 }
 
 type ElectionId struct {
@@ -78,22 +72,27 @@ type PublicKey struct {
 	ID  string `bson:"id" json:"id"`
 }
 
+type EncryptedVote struct {
+	Vote    string `bson:"vote" json:"vote" bindings:"required"`
+	VoterID string `bson:"voterId"`
+}
+
 const (
-	draft     = "draft"
-	created   = "created"
-	waiting   = "waiting"
-	started   = "started"
-	finished  = "finished"
-	decrypted = "decrypted"
-	results   = "results"
+	Draft     = "draft"
+	Created   = "created"
+	Waiting   = "waiting"
+	Started   = "started"
+	Finished  = "finished"
+	Decrypted = "decrypted"
+	Results   = "results"
 )
 
 var Statuses = []string{
-	draft,
-	created,
-	waiting,
-	started,
-	finished,
-	decrypted,
-	results,
+	Draft,
+	Created,
+	Waiting,
+	Started,
+	Finished,
+	Decrypted,
+	Results,
 }

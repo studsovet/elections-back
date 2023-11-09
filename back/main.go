@@ -58,15 +58,15 @@ func main() {
 	electionsGroup := r.Group("/elections")
 
 	// elector
-	electionsGroup.POST("/becomeCandidate/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/myCandidateStatus/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/all", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/get", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/getCandidates/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/getVoices/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/becomeCandidate/:electionId", controllers.BecomeCandidate)
+	electionsGroup.GET("/myCandidateStatus/:electionId", controllers.MyCandidateStatus)
+	electionsGroup.GET("/all", controllers.GetFilteredElections)
+	electionsGroup.GET("/get/:electionId", controllers.GetElection)
+	electionsGroup.GET("/getCandidates/:electionId", controllers.GetCandidates)
+	electionsGroup.GET("/getVoices/:electionId", controllers.GetEncryptedVotes)
 	electionsGroup.GET("/getResults/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.POST("/vote/:electionId", controllers.ElectionNotImplemented)
-	electionsGroup.GET("/publicKey/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/vote/:electionId", controllers.PostVote)
+	electionsGroup.GET("/publicKey/:electionId", controllers.GetPublicKey)
 
 	// observer
 	electionsGroup.POST("/setPrivateKey/:electionId", controllers.ElectionNotImplemented)

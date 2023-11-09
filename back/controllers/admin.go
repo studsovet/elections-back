@@ -16,6 +16,7 @@ func CreateElection(c *gin.Context) {
 		return
 	}
 	election.ID = uuid.New().String()
+	election.Status = db.Statuses[0]
 	election.Save()
 	c.JSON(http.StatusOK, gin.H{"message": "success", "election": election})
 }
@@ -76,7 +77,35 @@ func Next(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := db.ElectionNext(id.ID)
+	election, err := db.GetElection(id.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	status := election.Status
+	status_num := -1
+	for i, s := range db.Statuses {
+		if s == status {
+			status_num = i
+			break
+		}
+	}
+	if status_num == -1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "not such status: " + status})
+		return
+	}
+	if status_num+1 == len(db.Statuses) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot move next last status: " + status})
+		return
+	}
+	new_status := db.Statuses[status_num+1]
+	if new_status == db.Started {
+		if _, err := db.GetPublicKey(id.ID); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Before moving to status " + status + ", add public key"})
+			return
+		}
+	}
+	err = db.ElectionUpdateStatus(id.ID, new_status)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "approved query parse error: " + err.Error()})
 		return

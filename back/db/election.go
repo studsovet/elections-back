@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -26,29 +25,26 @@ func GetElection(id string) (Election, error) {
 	return election, nil
 }
 
-func ElectionNext(id string) error {
-	election, err := GetElection(id)
+func GetElections() ([]Election, error) {
+	coll := DB.Database("public").Collection("elections")
+	filter := bson.D{{}}
+	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
-		return err
+		return []Election{}, err
 	}
-	status := election.Status
-	status_num := -1
-	for i, s := range Statuses {
-		if s == status {
-			status_num = i
-			break
-		}
+
+	var elections []Election
+	err = cursor.All(context.TODO(), &elections)
+	if err != nil {
+		return []Election{}, err
 	}
-	if status_num == -1 {
-		return errors.New("not such status: " + status)
-	}
-	if status_num+1 == len(Statuses) {
-		return errors.New("Cannot move next last status: " + status)
-	}
-	new_status := Statuses[status_num+1]
+	return elections, nil
+}
+
+func ElectionUpdateStatus(id, new_status string) error {
 	coll := DB.Database("public").Collection("elections")
 	filter := bson.D{{Key: "id", Value: id}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: new_status}}}}
-	_, err = coll.UpdateOne(context.TODO(), filter, update)
+	_, err := coll.UpdateOne(context.TODO(), filter, update)
 	return err
 }
