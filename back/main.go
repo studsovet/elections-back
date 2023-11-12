@@ -52,8 +52,8 @@ func main() {
 	authGroup := r.Group("/auth")
 
 	// auth
-	authGroup.GET("/elk", controllers.ElectionNotImplemented)
-	authGroup.POST("/redirect", controllers.ElectionNotImplemented)
+	authGroup.GET("/elk", controllers.RedirectToELK)
+	authGroup.POST("/redirect", controllers.Login)
 
 	electionsGroup := r.Group("/elections")
 

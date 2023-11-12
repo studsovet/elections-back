@@ -8,9 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MicahParks/keyfunc/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+var keyset *keyfunc.JWKS
 
 func GenerateToken(user_id string) (string, error) {
 	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
@@ -90,4 +93,26 @@ func ExtractTokenID(c *gin.Context) (string, error) {
 		return "", errors.New("wrong token")
 	}
 	return "", errors.New("wrong token")
+}
+
+func VerifyHSEToken(t string) (*jwt.Token, error) {
+	if keyset == nil {
+		jwksUrl := "https://auth.hse.ru/adfs/discovery/keys"
+		var err error
+		keyset, err = keyfunc.Get(jwksUrl, keyfunc.Options{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	token, err := jwt.Parse(t, keyset.Keyfunc)
+	if err != nil {
+		return nil, err
+	} else if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	audience := token.Header["aud"]
+	if audience.(string) != "microsoft:identityserver:"+os.Getenv("CLIENT_ID") {
+		return nil, errors.New("invalid audience")
+	}
+	return token, nil
 }
