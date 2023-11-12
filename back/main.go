@@ -69,7 +69,7 @@ func main() {
 	electionsGroup.GET("/publicKey/:electionId", controllers.GetPublicKey)
 
 	// observer
-	electionsGroup.POST("/setPrivateKey/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.POST("/setPrivateKey/:electionId", controllers.PostSavePrivateKey)
 
 	// admin
 	electionsGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)

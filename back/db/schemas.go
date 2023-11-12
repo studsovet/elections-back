@@ -72,6 +72,11 @@ type PublicKey struct {
 	ID  string `bson:"id" json:"id"`
 }
 
+type PrivateKey struct {
+	Key string `bson:"key" json:"key" bindings:"required"`
+	ID  string `bson:"id" json:"id"`
+}
+
 type EncryptedVote struct {
 	Vote    string `bson:"vote" json:"vote" bindings:"required"`
 	VoterID string `bson:"voterId"`

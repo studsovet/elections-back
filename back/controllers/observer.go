@@ -1,6 +1,11 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"elections-back/db"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 /*
 func SetPrivateKey(c *gin.Context) {
@@ -76,5 +81,19 @@ func SetPrivateKey(c *gin.Context) {
 */
 
 func PostSavePrivateKey(c *gin.Context) {
-
+	var id db.ElectionId
+	if err := c.ShouldBindUri(&id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var public_key db.PrivateKey
+	public_key.Key = c.Query("key")
+	if public_key.Key == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `key` in query"})
+		return
+	}
+	public_key.ID = id.ID
+	print("key", public_key.ID, public_key.Key)
+	public_key.Save()
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
