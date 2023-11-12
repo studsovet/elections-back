@@ -81,9 +81,9 @@ func main() {
 	dictionariesGroup := r.Group("/dictionaries")
 
 	// dictionary
-	dictionariesGroup.GET("/councilOrganizations", controllers.ElectionNotImplemented)
-	dictionariesGroup.GET("/faculty", controllers.ElectionNotImplemented)
-	dictionariesGroup.GET("/dormitory", controllers.ElectionNotImplemented)
+	dictionariesGroup.GET("/councilOrganizations", controllers.GetCouncilOrganizations)
+	dictionariesGroup.GET("/faculty", controllers.GetFaculty)
+	dictionariesGroup.GET("/dormitory", controllers.GetDormitory)
 
 	r.Run()
 }

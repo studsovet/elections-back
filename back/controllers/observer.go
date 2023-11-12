@@ -1,5 +1,7 @@
 package controllers
 
+import "github.com/gin-gonic/gin"
+
 /*
 func SetPrivateKey(c *gin.Context) {
 	var input db.Key
@@ -72,3 +74,7 @@ func SetPrivateKey(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
 */
+
+func PostSavePrivateKey(c *gin.Context) {
+
+}
