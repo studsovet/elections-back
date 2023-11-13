@@ -42,12 +42,12 @@ jobs:
 
           docker push $REPO:${{ steps.extract_branch.outputs.branch }}
       - name: Deploy stack to Portainer
-        uses: carlrygart/portainer-stack-deploy@v1.3.0
+        uses: kgierke/portainer-stack-deployment@v1.0.1
         with:
-          portainer-host: '${{ secrets.PORTAINER_URL }}'
-          username: '${{ secrets.PORTAINER_USERNAME }}'
-          password: '${{ secrets.PORTAINER_PASSWORD }}'
-          stack-name: '${{ secrets.PORTAINER_STACK_NAME }}'
-          endpoint-id: '${{ secrets.PORTAINER_ENDPOINT_ID }}'
-          stack-definition: .github/workflows/stack-definition.yml
-          template-variables: '${{ secrets.PORTAINER_TEMPLATE }}'
+          portainer-url: '${{ secrets.PORTAINER_URL }}'
+          portainer-username: '${{ secrets.PORTAINER_USERNAME }}'
+          portainer-password: '${{ secrets.PORTAINER_PASSWORD }}'
+          name: '${{ secrets.PORTAINER_STACK_NAME }}'
+          portainer-endpoint: '${{ secrets.PORTAINER_ENDPOINT_ID }}'
+          file: .github/workflows/stack-definition.yml
+          variables: '${{ secrets.PORTAINER_TEMPLATE }}'
