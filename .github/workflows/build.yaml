@@ -35,11 +35,13 @@ jobs:
         docker tag $REPO:$IMAGE_TAG $REPO:${{ steps.extract_branch.outputs.branch }}
         docker push $REPO:latest
         docker push $REPO:${{ steps.extract_branch.outputs.branch }}
-    - name: portainer
-      uses:  wirgen/portainer-stack-redeploy-action@v1.3.0
-      with:
-        portainerUrl: ${{ secrets.PORTAINER_URL }}
-        accessToken: ${{ secrets.PORTAINER_TOKEN }}
-        stackId: ${{ secrets.PORTAINER_STACK_ID }}}
-        endpointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
-        templateVariables: ${{ secrets.PORTAINER_TEMPLATE }}
+      - name: Deploy stack to Portainer
+        uses: carlrygart/portainer-stack-deploy@v1.3.0
+        with:
+          portainer-host: ${{ secrets.PORTAINER_URL }}
+          username: ${{ secrets.PORTAINER_USERNAME }}
+          password: ${{ secrets.PORTAINER_PASSWORD }}
+          stack-name: ${{ secrets.PORTAINER_STACK_NAME }}
+          endpoint-id: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          stack-definition: '.github/workflows/stack-definition.yml'
+          template-variables: ${{ secretes.PORTAINER_TEMPLATE }}
