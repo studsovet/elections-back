@@ -36,7 +36,7 @@ jobs:
         docker push $REPO:latest
         docker push $REPO:${{ steps.extract_branch.outputs.branch }}
     - name: portainer
-      uses:  wirgen/portainer-stack-redeploy-action@v1.3
+      uses:  wirgen/portainer-stack-redeploy-action@v1.3.0
       with:
         portainerUrl: ${{ secrets.PORTAINER_URL }}
         accessToken: ${{ secrets.PORTAINER_TOKEN }}
