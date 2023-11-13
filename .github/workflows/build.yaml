@@ -50,4 +50,4 @@ jobs:
           stack-name: '${{ secrets.PORTAINER_STACK_NAME }}'
           endpoint-id: '${{ secrets.PORTAINER_ENDPOINT_ID }}'
           stack-definition: .github/workflows/stack-definition.yml
-          template-variables: '${{ secretes.PORTAINER_TEMPLATE }}'
+          template-variables: '${{ secrets.PORTAINER_TEMPLATE }}'
