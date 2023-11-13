@@ -49,5 +49,5 @@ jobs:
           portainer-password: '${{ secrets.PORTAINER_PASSWORD }}'
           name: '${{ secrets.PORTAINER_STACK_NAME }}'
           portainer-endpoint: '${{ secrets.PORTAINER_ENDPOINT_ID }}'
-          file: .github/workflows/stack-definition.yml
+          file: .github/workflows/stack-definition.mustache
           variables: '${{ secrets.PORTAINER_TEMPLATE }}'
