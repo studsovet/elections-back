@@ -1,47 +1,53 @@
 name: Deploy to GHCR
-
 on:
   push:
     branches:
       - master
       - election
-  workflow_dispatch:
-
+  workflow_dispatch: null
 jobs:
   build:
     name: Build Image
     runs-on: ubuntu-latest
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
-    - name: Extract branch name
-      shell: bash
-      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      id: extract_branch
-    - name: 'Login to GitHub Container Registry'
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{github.actor}}
-        password: ${{secrets.GITHUB_TOKEN}}
-    - name: Build, tag, and push image to Amazon ECR
-      env:
-        REPO: ghcr.io/studsovet/elections-back
-        IMAGE_TAG: ${{ steps.extract_branch.outputs.branch }}-${{ github.sha }}
-      run: |
-        docker build -t $REPO:$IMAGE_TAG ./back
-        docker push $REPO:$IMAGE_TAG
-        docker tag $REPO:$IMAGE_TAG $REPO:latest
-        docker tag $REPO:$IMAGE_TAG $REPO:${{ steps.extract_branch.outputs.branch }}
-        docker push $REPO:latest
-        docker push $REPO:${{ steps.extract_branch.outputs.branch }}
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: >-
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >>
+          $GITHUB_OUTPUT
+        id: extract_branch
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: '${{github.actor}}'
+          password: '${{secrets.GITHUB_TOKEN}}'
+      - name: 'Build, tag, and push image to Amazon ECR'
+        env:
+          REPO: ghcr.io/studsovet/elections-back
+          IMAGE_TAG: '${{ steps.extract_branch.outputs.branch }}-${{ github.sha }}'
+        run: >
+          docker build -t $REPO:$IMAGE_TAG ./back
+
+          docker push $REPO:$IMAGE_TAG
+
+          docker tag $REPO:$IMAGE_TAG $REPO:latest
+
+          docker tag $REPO:$IMAGE_TAG $REPO:${{
+          steps.extract_branch.outputs.branch }}
+
+          docker push $REPO:latest
+
+          docker push $REPO:${{ steps.extract_branch.outputs.branch }}
       - name: Deploy stack to Portainer
         uses: carlrygart/portainer-stack-deploy@v1.3.0
         with:
-          portainer-host: ${{ secrets.PORTAINER_URL }}
-          username: ${{ secrets.PORTAINER_USERNAME }}
-          password: ${{ secrets.PORTAINER_PASSWORD }}
-          stack-name: ${{ secrets.PORTAINER_STACK_NAME }}
-          endpoint-id: ${{ secrets.PORTAINER_ENDPOINT_ID }}
-          stack-definition: '.github/workflows/stack-definition.yml'
-          template-variables: ${{ secretes.PORTAINER_TEMPLATE }}
+          portainer-host: '${{ secrets.PORTAINER_URL }}'
+          username: '${{ secrets.PORTAINER_USERNAME }}'
+          password: '${{ secrets.PORTAINER_PASSWORD }}'
+          stack-name: '${{ secrets.PORTAINER_STACK_NAME }}'
+          endpoint-id: '${{ secrets.PORTAINER_ENDPOINT_ID }}'
+          stack-definition: .github/workflows/stack-definition.yml
+          template-variables: '${{ secretes.PORTAINER_TEMPLATE }}'
