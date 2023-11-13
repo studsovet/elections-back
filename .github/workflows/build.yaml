@@ -2,6 +2,9 @@ name: Deploy to GHCR
 
 on:
   push:
+    branches:
+      - master
+      - elections
   workflow_dispatch:
 
 jobs:
@@ -39,3 +42,4 @@ jobs:
         accessToken: ${{ secrets.PORTAINER_TOKEN }}
         stackId: ${{ secrets.PORTAINER_STACK_ID }}}
         endpointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+        templateVariables: ${{ secrets.PORTAINER_TEMPLATE }}
