@@ -13,7 +13,7 @@ import (
 
 type AuthorizationCallback struct {
 	AccessToken string `form:"access_token" binding:"required"`
-	ExpireIn    string `form:"expires_in" binding:"required"`
+	ExpiresIn   int    `form:"expires_in" binding:"required"`
 	State       string `form:"state" binding:"required"`
 	TokenType   string `form:"token_type" binding:"required"`
 }
@@ -46,6 +46,7 @@ func RedirectToELK(c *gin.Context) {
 func Login(c *gin.Context) {
 	var input AuthorizationCallback
 	if err := c.Bind(&input); err != nil {
+		fmt.Println("Error binding form data:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
 		return
 	}
