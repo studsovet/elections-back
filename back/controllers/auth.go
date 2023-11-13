@@ -13,7 +13,7 @@ import (
 
 type AuthorizationCallback struct {
 	AccessToken string `form:"access_token" binding:"required"`
-	ExpireIn    string `form:"expire_in" binding:"required"`
+	ExpireIn    string `form:"expires_in" binding:"required"`
 	State       string `form:"state" binding:"required"`
 	TokenType   string `form:"token_type" binding:"required"`
 }
