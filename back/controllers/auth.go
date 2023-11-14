@@ -55,9 +55,9 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": input.AccessToken, "headers": token.Headers})
+	c.JSON(http.StatusOK, gin.H{"token": input.AccessToken, "headers": token.Header})
 	
-	// Then use token.Headers to get user data
+	// Then use token.Header to get user data
 }
 
 type RegisterInput struct {
