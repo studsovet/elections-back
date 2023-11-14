@@ -74,7 +74,8 @@ func ObserverAuthMiddleware() gin.HandlerFunc {
 */
 
 func TokenAuthMiddleware(c *gin.Context) {
-	if c.Request.Method == "GET" && (c.Request.URL.Path == "/ping" || c.Request.URL.Path == "/auth/elk" || c.Request.URL.Path == "/auth/redirect") {
+	if (c.Request.Method == "GET" && (c.Request.URL.Path == "/ping" || c.Request.URL.Path == "/auth/elk")) ||
+		(c.Request.Method == "POST" && c.Request.URL.Path == "/auth/redirect") {
 		c.Next()
 		return
 	}
