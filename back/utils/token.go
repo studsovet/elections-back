@@ -2,53 +2,14 @@ package token
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/MicahParks/keyfunc/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"os"
+	"strings"
 )
 
 var keyset *keyfunc.JWKS
-
-func GenerateToken(user_id string) (string, error) {
-	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
-	if err != nil {
-		return "", err
-	}
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = user_id
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(token_lifespan)).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("API_SECRET")))
-}
-
-func TokenValid(c *gin.Context) error {
-	tokenString := ExtractToken(c)
-	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("API_SECRET")), nil
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func SetTokenCookie(c *gin.Context, token string) {
-	token_lifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
-	if err != nil {
-		return
-	}
-	c.SetCookie("token", token, token_lifespan*3600, "/", "localhost", false, false)
-}
 
 func ExtractToken(c *gin.Context) string {
 	cookie, err := c.Cookie("token")
@@ -68,33 +29,6 @@ func ExtractToken(c *gin.Context) string {
 	return ""
 }
 
-func ExtractTokenID(c *gin.Context) (string, error) {
-	tokenString := ExtractToken(c)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(os.Getenv("API_SECRET")), nil
-	})
-	if err != nil {
-		return "", err
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		id, ok := claims["user_id"]
-		if !ok {
-			return "", errors.New("wrong token")
-		}
-		switch idType := id.(type) {
-		case string:
-			uid := string(idType)
-			return uid, nil
-		}
-		return "", errors.New("wrong token")
-	}
-	return "", errors.New("wrong token")
-}
-
 func VerifyHSEToken(t string) (*jwt.Token, error) {
 	if keyset == nil {
 		jwksUrl := "https://auth.hse.ru/adfs/discovery/keys"
@@ -110,8 +44,8 @@ func VerifyHSEToken(t string) (*jwt.Token, error) {
 	} else if !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-	audience := token.Header["aud"]
-	if audience.(string) != "microsoft:identityserver:"+os.Getenv("CLIENT_ID") {
+	audience := token.Claims.(jwt.MapClaims)["aud"]
+	if audience == nil || audience.(string) != "microsoft:identityserver:"+os.Getenv("CLIENT_ID") {
 		return nil, errors.New("invalid audience")
 	}
 	return token, nil

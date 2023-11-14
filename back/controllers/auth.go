@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	db "elections-back/db"
 	token "elections-back/utils"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"os"
 
@@ -55,9 +55,9 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{"token": input.AccessToken})
-	
+
 	// Then use token.Header to get user data
 }
 
@@ -66,16 +66,10 @@ type RegisterInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func GetCurrentUser(c *gin.Context) (db.User, error) {
-	user_id, err := token.ExtractTokenID(c)
-	if err != nil {
-		return db.User{}, err
-	}
-
-	u, err := db.GetUserByID(user_id)
-
-	if err != nil {
-		return db.User{}, err
-	}
-	return u, nil
+func GetMe(c *gin.Context) {
+	claims := c.MustGet("claims").(jwt.MapClaims)
+	asJson, _ := json.Marshal(claims)
+	asMap := map[string]interface{}{}
+	json.Unmarshal(asJson, &asMap)
+	c.JSON(http.StatusOK, gin.H{"first_name": asMap["firstname"], "last_name": asMap["lastname"], "email": asMap["email"]})
 }

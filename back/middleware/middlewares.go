@@ -1,5 +1,12 @@
 package middlewares
 
+import (
+	token "elections-back/utils"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+)
+
 /*
 func JwtAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -65,3 +72,20 @@ func ObserverAuthMiddleware() gin.HandlerFunc {
 	}
 }
 */
+
+func TokenAuthMiddleware(c *gin.Context) {
+	bearerToken := token.ExtractToken(c)
+	fmt.Println(bearerToken)
+	if bearerToken == "" {
+		c.AbortWithStatusJSON(401, gin.H{"error": "token not found"})
+		return
+	}
+	token, err := token.VerifyHSEToken(bearerToken)
+	if err != nil {
+		c.AbortWithStatusJSON(403, gin.H{"error": "invalid token"})
+		return
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	c.Set("claims", claims)
+	c.Next()
+}

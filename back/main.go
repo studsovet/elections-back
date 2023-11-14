@@ -1,6 +1,7 @@
 package main
 
 import (
+	middlewares "elections-back/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ func main() {
 	db.ConnectDB()
 
 	r := gin.Default()
+	r.Use(middlewares.TokenAuthMiddleware)
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -54,6 +56,7 @@ func main() {
 	// auth
 	authGroup.GET("/elk", controllers.RedirectToELK)
 	authGroup.POST("/redirect", controllers.Login)
+	authGroup.GET("/me", controllers.GetMe)
 
 	electionsGroup := r.Group("/elections")
 
