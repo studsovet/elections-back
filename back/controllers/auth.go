@@ -56,9 +56,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": input.AccessToken})
-
-	// Then use token.Header to get user data
+	c.Redirect(302, "https://elections.studsovet.me")
 }
 
 type RegisterInput struct {
