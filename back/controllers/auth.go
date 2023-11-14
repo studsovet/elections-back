@@ -46,13 +46,13 @@ func RedirectToELK(c *gin.Context) {
 func Login(c *gin.Context) {
 	var input AuthorizationCallback
 	if err := c.Bind(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
 		return
 	}
 
 	_, err := token.VerifyHSEToken(input.AccessToken) // token
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
 
