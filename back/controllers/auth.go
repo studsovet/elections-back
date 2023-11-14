@@ -55,7 +55,8 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-
+	c.SetCookie("token", input.AccessToken, 60*60, "/", "elections.studsovet.me", false, false)
+	c.SetCookie("token", input.AccessToken, 60*60, "/", "elections-api.studsovet.me", false, false)
 	c.Redirect(302, "https://elections.studsovet.me")
 }
 
