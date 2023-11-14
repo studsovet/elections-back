@@ -50,7 +50,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	tokenData, err := token.VerifyHSEToken(input.AccessToken) // token
+	_, err := token.VerifyHSEToken(input.AccessToken) // token
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
