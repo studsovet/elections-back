@@ -55,7 +55,8 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-
+	c.JSON(http.StatusOK, gin.H{"token": input.AccessToken})
+	
 	// Then use token.Headers to get user data
 }
 
