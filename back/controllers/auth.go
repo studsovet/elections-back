@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,9 +31,31 @@ func GenerateState(state RouterState) string {
 }
 
 func RedirectToELK(c *gin.Context) {
+	redirect := c.Query("redirect_uri")
+	if redirect == "" {
+		redirect = os.Getenv("DEFAULT_REDIRECT")
+	} else {
+		if os.Getenv("ALLOWED_REDIRECTS") != "" {
+			allowedRedirects := os.Getenv("ALLOWED_REDIRECTS")
+			allowedRedirectsSlice := strings.Split(allowedRedirects, ",")
+			allowed := false
+			for _, allowedRedirect := range allowedRedirectsSlice {
+				if strings.TrimSpace(allowedRedirect) == redirect {
+					allowed = true
+					break
+				}
+			}
+			if !allowed {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid redirect"})
+				return
+			}
+		}
+	}
 	state := GenerateState(RouterState{
 		ServiceID: os.Getenv("SERVICE_ID"),
-		StateData: map[string]interface{}{},
+		StateData: map[string]interface{}{
+			"redirect_uri": redirect,
+		},
 	})
 
 	c.Redirect(302,
@@ -55,9 +78,23 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-	c.SetCookie("token", input.AccessToken, 60*60, "/", "elections.studsovet.me", false, false)
 	c.SetCookie("token", input.AccessToken, 60*60, "/", "elections-api.studsovet.me", false, false)
-	c.Redirect(302, "https://elections.studsovet.me")
+	stateAsJson, err := base64.StdEncoding.DecodeString(input.State)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
+		return
+	}
+	var state map[string]string
+	err = json.Unmarshal(stateAsJson, &state)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
+		return
+	}
+	redirectUri, exists := state["redirect_uri"]
+	if !exists {
+		redirectUri = os.Getenv("DEFAULT_REDIRECT")
+	}
+	c.Redirect(302, redirectUri+"?token="+input.AccessToken)
 }
 
 type RegisterInput struct {
