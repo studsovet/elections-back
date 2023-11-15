@@ -84,17 +84,17 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
 		return
 	}
-	var state map[string]string
+	var state RouterState
 	err = json.Unmarshal(stateAsJson, &state)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
 		return
 	}
-	redirectUri, exists := state["redirect_uri"]
+	redirectUri, exists := state.StateData["redirect_uri"]
 	if !exists {
 		redirectUri = os.Getenv("DEFAULT_REDIRECT")
 	}
-	c.Redirect(302, redirectUri+"?token="+input.AccessToken)
+	c.Redirect(302, redirectUri.(string)+"?token="+input.AccessToken)
 }
 
 type RegisterInput struct {
