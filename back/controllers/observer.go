@@ -2,7 +2,10 @@ package controllers
 
 import (
 	"elections-back/db"
+	"fmt"
 	"net/http"
+
+	token "elections-back/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -86,14 +89,40 @@ func PostSavePrivateKey(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var public_key db.PrivateKey
-	public_key.Key = c.Query("key")
-	if public_key.Key == "" {
+
+	var private_key db.PrivateKey
+	private_key.Key = c.Query("key")
+	private_key.ID = id.ID
+	if private_key.Key == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `key` in query"})
 		return
 	}
-	public_key.ID = id.ID
-	print("key", public_key.ID, public_key.Key)
-	public_key.Save()
+
+	privateKey, err := token.ParsePrivateKey(private_key.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	dbPublicKey, err := db.GetPublicKey(private_key.ID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	publicKey, err := token.ParsePublicKey(dbPublicKey.Key)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	if !token.IsKeyMatched(publicKey, privateKey) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "keys not matched"})
+		return
+	}
+
+	private_key.Save()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }

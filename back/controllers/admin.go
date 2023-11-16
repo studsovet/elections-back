@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"elections-back/db"
+	"fmt"
 	"net/http"
 	"strconv"
+
+	token "elections-back/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -33,6 +36,13 @@ func SetPublicKey(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `key` in query"})
 		return
 	}
+
+	_, err := token.ParsePublicKey(public_key.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
 	public_key.ID = id.ID
 	print("key", public_key.ID, public_key.Key)
 	public_key.Save()

@@ -4,18 +4,19 @@ import (
 	token "elections-back/utils"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthorizationCallback struct {
 	AccessToken string `form:"access_token" binding:"required"`
-	ExpiresIn   string `form:"expires_in" binding:"required"`
-	State       string `form:"state" binding:"required"`
+	ExpiresIn   string `form:"expires_in"`
+	State       string `form:"state"`
 	TokenType   string `form:"token_type" binding:"required"`
 }
 
@@ -78,23 +79,27 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "token invalid"})
 		return
 	}
-	c.SetCookie("token", input.AccessToken, 60*60, "/", "elections-api.studsovet.me", false, false)
-	stateAsJson, err := base64.StdEncoding.DecodeString(input.State)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
-		return
+	c.SetCookie("token", input.AccessToken, 60*60, "/", c.Request.Host, false, false)
+	if input.State != "" {
+		stateAsJson, err := base64.StdEncoding.DecodeString(input.State)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
+			return
+		}
+		var state RouterState
+		err = json.Unmarshal(stateAsJson, &state)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
+			return
+		}
+		redirectUri, exists := state.StateData["redirect_uri"]
+		if !exists {
+			redirectUri = os.Getenv("DEFAULT_REDIRECT")
+		}
+		c.Redirect(302, redirectUri.(string)+"?token="+input.AccessToken)
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": "OK"})
 	}
-	var state RouterState
-	err = json.Unmarshal(stateAsJson, &state)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid state"})
-		return
-	}
-	redirectUri, exists := state.StateData["redirect_uri"]
-	if !exists {
-		redirectUri = os.Getenv("DEFAULT_REDIRECT")
-	}
-	c.Redirect(302, redirectUri.(string)+"?token="+input.AccessToken)
 }
 
 type RegisterInput struct {
