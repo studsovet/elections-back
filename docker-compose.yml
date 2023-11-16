@@ -36,6 +36,7 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       API_SECRET: ${API_SECRET}
       TOKEN_HOUR_LIFESPAN: ${TOKEN_HOUR_LIFESPAN}
+      CLIENT_ID: ${CLIENT_ID}
     command:
       - ./app
     ports:

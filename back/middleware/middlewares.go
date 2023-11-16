@@ -3,6 +3,7 @@ package middlewares
 import (
 	token "elections-back/utils"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -87,7 +88,7 @@ func TokenAuthMiddleware(c *gin.Context) {
 	}
 	token, err := token.VerifyHSEToken(bearerToken)
 	if err != nil {
-		c.AbortWithStatusJSON(403, gin.H{"error": "invalid token"})
+		c.AbortWithStatusJSON(403, gin.H{"error": fmt.Sprint(err)})
 		return
 	}
 	claims := token.Claims.(jwt.MapClaims)

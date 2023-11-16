@@ -2,11 +2,12 @@ package token
 
 import (
 	"errors"
+	"os"
+	"strings"
+
 	"github.com/MicahParks/keyfunc/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"os"
-	"strings"
 )
 
 var keyset *keyfunc.JWKS
@@ -27,6 +28,29 @@ func ExtractToken(c *gin.Context) string {
 		return strings.Split(bearerToken, " ")[1]
 	}
 	return ""
+}
+
+func ExtractTokenID(c *gin.Context) (string, error) {
+	tokenString := ExtractToken(c)
+	token, err := VerifyHSEToken(tokenString)
+
+	if err != nil {
+		return "", err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		id, ok := claims["email"]
+		if !ok {
+			return "", errors.New("wrong token")
+		}
+		switch idType := id.(type) {
+		case string:
+			uid := string(idType)
+			return uid, nil
+		}
+		return "", errors.New("wrong token")
+	}
+	return "", errors.New("wrong token")
 }
 
 func VerifyHSEToken(t string) (*jwt.Token, error) {
