@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -38,7 +39,7 @@ func (c *Candidate) Save() (*Candidate, error) {
 	return c, nil
 }
 
-func GetCandidate(election_id, candidate_id string) (Candidate, error) {
+func GetCandidate(election_id int64, candidate_id string) (Candidate, error) {
 	coll := DB.Database("public").Collection("candidates")
 	filter := bson.D{{Key: "id", Value: candidate_id},
 		{Key: "electionId", Value: election_id}}
@@ -50,7 +51,7 @@ func GetCandidate(election_id, candidate_id string) (Candidate, error) {
 	return candidate, nil
 }
 
-func ApproveCandidate(id string, approved bool) error {
+func ApproveCandidate(id int64, approved bool) error {
 	coll := DB.Database("public").Collection("candidates")
 	filter := bson.D{{Key: "id", Value: id}}
 	update := bson.D{{Key: "$set",
@@ -59,14 +60,14 @@ func ApproveCandidate(id string, approved bool) error {
 	}}
 	res, err := coll.UpdateOne(context.TODO(), filter, update)
 	if res.MatchedCount == 0 {
-		return errors.New("no candidate with id `" + id + "` found")
+		return errors.New("no candidate with id `" + fmt.Sprint(id) + "` found")
 	}
 	return err
 }
 
-func GetCandidates(election_id string) ([]Candidate, error) {
+func GetCandidates(candidate_id int64) ([]Candidate, error) {
 	coll := DB.Database("public").Collection("candidates")
-	filter := bson.D{{Key: "electionId", Value: election_id},
+	filter := bson.D{{Key: "electionId", Value: candidate_id},
 		{Key: "approved", Value: true}}
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {

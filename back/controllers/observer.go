@@ -84,6 +84,8 @@ func SetPrivateKey(c *gin.Context) {
 */
 
 func PostSavePrivateKey(c *gin.Context) {
+	// TODO: make it available only in the finished state
+
 	var id db.ElectionId
 	if err := c.ShouldBindUri(&id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

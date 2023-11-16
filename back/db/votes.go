@@ -2,14 +2,15 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
+func (v *EncryptedVote) Save(election_id int64) (*EncryptedVote, error) {
 	var err error
 
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 	_, err = coll.InsertOne(context.TODO(), v)
 	if err != nil {
 		return &EncryptedVote{}, err
@@ -18,8 +19,8 @@ func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 
 }
 
-func IsVoted(election_id, voter_id string) (bool, error) {
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
+func IsVoted(election_id int64, voter_id string) (bool, error) {
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 
 	filter := bson.D{{Key: "voterId", Value: voter_id}}
 	count, err := coll.CountDocuments(context.TODO(), filter)
@@ -32,8 +33,8 @@ func IsVoted(election_id, voter_id string) (bool, error) {
 	return false, nil
 }
 
-func GetEncryptedVotes(election_id string) ([]EncryptedVote, error) {
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
+func GetEncryptedVotes(election_id int64) ([]EncryptedVote, error) {
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 	cursor, err := coll.Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		return []EncryptedVote{}, err

@@ -78,7 +78,7 @@ func main() {
 	electionsGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)
 	electionsGroup.POST("/create", controllers.CreateElection)
 	electionsGroup.POST("/approveCandidate/:candidateId", controllers.ApproveCandidate)
-	electionsGroup.POST("/next/:electionId", controllers.Next)
+	electionsGroup.GET("/next/:electionId", controllers.Next)
 	electionsGroup.GET("/getAllCandidates", controllers.GetAllCandidates)
 
 	dictionariesGroup := r.Group("/dictionaries")

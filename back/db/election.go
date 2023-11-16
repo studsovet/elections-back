@@ -7,12 +7,18 @@ import (
 )
 
 func (e *Election) Save() (*Election, error) {
-	_, err := DB.Database("public").Collection("elections").InsertOne(context.TODO(), e)
+	_, err := DB.Database("public").Collection("elections").DeleteMany(context.TODO(), bson.D{{"id", e.ID}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = DB.Database("public").Collection("elections").InsertOne(context.TODO(), e)
 
 	return e, err
 }
 
-func GetElection(id string) (Election, error) {
+func GetElection(id int64) (Election, error) {
 	coll := DB.Database("public").Collection("elections")
 	filter := bson.D{{Key: "id", Value: id}}
 
@@ -41,7 +47,7 @@ func GetElections() ([]Election, error) {
 	return elections, nil
 }
 
-func ElectionUpdateStatus(id, new_status string) error {
+func ElectionUpdateStatus(id int64, new_status string) error {
 	coll := DB.Database("public").Collection("elections")
 	filter := bson.D{{Key: "id", Value: id}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: new_status}}}}

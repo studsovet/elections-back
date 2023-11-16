@@ -9,7 +9,6 @@ import (
 	token "elections-back/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func CreateElection(c *gin.Context) {
@@ -18,13 +17,14 @@ func CreateElection(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	election.ID = uuid.New().String()
 	election.Status = db.Statuses[0]
 	election.Save()
 	c.JSON(http.StatusOK, gin.H{"message": "success", "election": election})
 }
 
 func SetPublicKey(c *gin.Context) {
+	// TODO: make it available only in the waiting state
+
 	var id db.ElectionId
 	if err := c.ShouldBindUri(&id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -109,12 +109,21 @@ func Next(c *gin.Context) {
 		return
 	}
 	new_status := db.Statuses[status_num+1]
+
 	if new_status == db.Started {
 		if _, err := db.GetPublicKey(id.ID); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Before moving to status " + status + ", add public key"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Before moving to status " + new_status + ", add public key"})
 			return
 		}
 	}
+
+	if new_status == db.Decrypted {
+		if _, err := db.GetPrivateKey(id.ID); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Before moving to status " + new_status + ", add private key"})
+			return
+		}
+	}
+
 	err = db.ElectionUpdateStatus(id.ID, new_status)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "approved query parse error: " + err.Error()})

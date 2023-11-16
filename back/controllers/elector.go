@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"elections-back/db"
@@ -16,10 +17,11 @@ func GetPublicKey(c *gin.Context) {
 	}
 	key, err := db.GetPublicKey(election_id.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, key.Key)
+
+	c.Data(http.StatusOK, "application/x-pem-file", []byte(key.Key))
 
 }
 
@@ -45,10 +47,11 @@ func GetElection(c *gin.Context) {
 	}
 
 	election, err := db.GetElection(election_id.ID)
-	if (election.Status != db.Started) || err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found"})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
 		return
 	}
+
 	c.JSON(http.StatusOK, election)
 }
 
@@ -58,7 +61,7 @@ func GetFilteredElections(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var elections_id []string
+	var elections_id []int64
 	for _, e := range elections {
 		if e.Status != db.Draft { // TODO move to mongo
 			elections_id = append(elections_id, e.ID)
