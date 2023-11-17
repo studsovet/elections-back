@@ -40,7 +40,7 @@ func (c *Candidate) Save() (*Candidate, error) {
 
 func GetCandidate(election_id string, candidate_id string) (Candidate, error) {
 	coll := DB.Database("public").Collection("candidates")
-	filter := bson.D{{Key: "id", Value: candidate_id},
+	filter := bson.D{{Key: "userId", Value: candidate_id},
 		{Key: "electionId", Value: election_id}}
 	var candidate Candidate
 	err := coll.FindOne(context.TODO(), filter).Decode(&candidate)

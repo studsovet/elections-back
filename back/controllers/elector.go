@@ -6,6 +6,8 @@ import (
 
 	"elections-back/db"
 
+	token "elections-back/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -89,7 +91,11 @@ func PostVote(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	vote.VoterID = "voter_id" // TODO!
+
+	if vote.VoterID, err = token.ExtractTokenID(c); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	voted, err := db.IsVoted(election_id.ID, vote.VoterID)
 	if err != nil {

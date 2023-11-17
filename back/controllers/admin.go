@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"elections-back/db"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	token "elections-back/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreateElection(c *gin.Context) {
@@ -17,6 +19,7 @@ func CreateElection(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	election.ID = uuid.NewString()
 	election.Status = db.Statuses[0]
 	election.Save()
 	c.JSON(http.StatusOK, gin.H{"message": "success", "election": election})
@@ -121,6 +124,56 @@ func Next(c *gin.Context) {
 		if _, err := db.GetPrivateKey(id.ID); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Before moving to status " + new_status + ", add private key"})
 			return
+		}
+	}
+
+	if new_status == db.Decrypted {
+		err = db.DropEncryptedVotes(id.ID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+			return
+		}
+
+		votes, err := db.GetEncryptedVotes(id.ID)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+			return
+		}
+
+		for _, vote := range votes {
+			encodedVote, err := base64.StdEncoding.DecodeString(vote.Vote)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				return
+			}
+
+			dbPrivateKey, err := db.GetPrivateKey(id.ID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				return
+			}
+
+			privateKey, err := token.ParsePrivateKey(dbPrivateKey.Key)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				return
+			}
+
+			var decryptedVote db.DecryptedVote
+			tmpBytes, err := token.DecryptWithPrivateKey(encodedVote, privateKey)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				return
+			}
+
+			decryptedVote.Vote = string(tmpBytes)
+
+			_, err = decryptedVote.Save(id.ID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				return
+			}
 		}
 	}
 

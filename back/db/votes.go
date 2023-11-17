@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,13 +11,33 @@ import (
 func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 	var err error
 
+	n, err := DB.Database("public").Collection("encrypted_votes_election_"+fmt.Sprint(election_id)).CountDocuments(context.TODO(), bson.D{{"voterId", v.VoterID}})
+
+	if n != 0 {
+		return nil, errors.New("already voted")
+	}
+
 	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 	_, err = coll.InsertOne(context.TODO(), v)
 	if err != nil {
 		return &EncryptedVote{}, err
 	}
 	return v, nil
+}
 
+func (v *DecryptedVote) Save(election_id string) (*DecryptedVote, error) {
+	var err error
+
+	coll := DB.Database("public").Collection("decrypted_votes_election_" + fmt.Sprint(election_id))
+	_, err = coll.InsertOne(context.TODO(), v)
+	if err != nil {
+		return &DecryptedVote{}, err
+	}
+	return v, nil
+}
+
+func DropEncryptedVotes(election_id string) error {
+	return DB.Database("public").Collection("decrypted_votes_election_" + fmt.Sprint(election_id)).Drop(context.TODO())
 }
 
 func IsVoted(election_id string, voter_id string) (bool, error) {

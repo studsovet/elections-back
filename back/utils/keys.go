@@ -1,7 +1,9 @@
 package token
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
 )
@@ -20,4 +22,13 @@ func ParsePublicKey(publicKey string) (any, error) {
 
 func IsKeyMatched(publicKey any, privateKey *rsa.PrivateKey) bool {
 	return privateKey.PublicKey.Equal(publicKey)
+}
+
+func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, error) {
+	hash := sha512.New()
+	plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
+	if err != nil {
+		return nil, err
+	}
+	return plaintext, nil
 }

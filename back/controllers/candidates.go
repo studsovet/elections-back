@@ -7,6 +7,7 @@ import (
 	token "elections-back/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func BecomeCandidate(c *gin.Context) {
@@ -24,7 +25,9 @@ func BecomeCandidate(c *gin.Context) {
 		return
 	}
 
-	if candidate.ID, err = token.ExtractTokenID(c); err != nil {
+	candidate.ID = uuid.NewString()
+
+	if candidate.UserId, err = token.ExtractTokenID(c); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
