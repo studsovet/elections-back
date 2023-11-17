@@ -61,7 +61,7 @@ func GetFilteredElections(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var elections_id []int64
+	var elections_id []string
 	for _, e := range elections {
 		if e.Status != db.Draft { // TODO move to mongo
 			elections_id = append(elections_id, e.ID)

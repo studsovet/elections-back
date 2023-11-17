@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (v *EncryptedVote) Save(election_id int64) (*EncryptedVote, error) {
+func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 	var err error
 
 	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
@@ -19,7 +19,7 @@ func (v *EncryptedVote) Save(election_id int64) (*EncryptedVote, error) {
 
 }
 
-func IsVoted(election_id int64, voter_id string) (bool, error) {
+func IsVoted(election_id string, voter_id string) (bool, error) {
 	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 
 	filter := bson.D{{Key: "voterId", Value: voter_id}}
@@ -33,7 +33,7 @@ func IsVoted(election_id int64, voter_id string) (bool, error) {
 	return false, nil
 }
 
-func GetEncryptedVotes(election_id int64) ([]EncryptedVote, error) {
+func GetEncryptedVotes(election_id string) ([]EncryptedVote, error) {
 	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
 	cursor, err := coll.Find(context.TODO(), bson.D{{}})
 	if err != nil {

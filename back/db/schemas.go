@@ -1,7 +1,7 @@
 package db
 
 type Elector struct {
-	ID                     int64   `bson:"id" json:"id" bindings:"required"`
+	ID                     string  `bson:"id" json:"id" bindings:"required"`
 	FullName               string  `bson:"fullname" json:"fullname"`
 	Email                  string  `bson:"email" json:"email" bindings:"required"`
 	IsDormitoryStudent     bool    `bson:"isDormitoryStudent" json:"isDormitoryStudent" bindings:"required"`
@@ -15,22 +15,22 @@ type Elector struct {
 }
 
 type Faculty struct {
-	ID   int64  `bson:"id" json:"id" bindings:"required"`
+	ID   string `bson:"id" json:"id" bindings:"required"`
 	Name string `bson:"name" json:"name" bindings:"required"`
 }
 
 type Dormitory struct {
-	ID   int64  `bson:"id" json:"id" bindings:"required"`
+	ID   string `bson:"id" json:"id" bindings:"required"`
 	Name string `bson:"name" json:"name" bindings:"required"`
 }
 
 type CouncilOrganization struct {
-	ID   int64  `bson:"id" json:"id" bindings:"required"`
+	ID   string `bson:"id" json:"id" bindings:"required"`
 	Name string `bson:"name" json:"name" bindings:"required"`
 }
 
 type Election struct {
-	ID                              int64   `bson:"id" json:"id" bindings:"required"`
+	ID                              string  `bson:"id" json:"id" bindings:"required"`
 	Name                            string  `bson:"name" json:"name" bindings:"required"`
 	Priority                        int64   `bson:"priority" json:"priority" bindings:"required"`
 	IsRunoff                        bool    `bson:"isRunoff" json:"isRunoff" bindings:"required"`
@@ -51,7 +51,7 @@ type ElectionResults struct {
 
 type Candidate struct {
 	ID                string `bson:"id" json:"id"`
-	ElectionId        int64  `bson:"electionId" json:"electionId"`
+	ElectionId        string `bson:"electionId" json:"electionId"`
 	Name              string `bson:"name" json:"name" bindings:"required"`
 	PhotoUrl          string `bson:"photourl" json:"photourl" bindings:"required"`
 	Description       string `bson:"description" json:"description" bindings:"required"`
@@ -60,21 +60,21 @@ type Candidate struct {
 }
 
 type ElectionId struct {
-	ID int64 `bson:"id" json:"id" uri:"electionId" bindings:"required"`
+	ID string `bson:"id" json:"id" uri:"electionId" bindings:"required"`
 }
 
 type CandidateId struct {
-	ID int64 `bson:"id" json:"id" uri:"candidateId" bindings:"required"`
+	ID string `bson:"id" json:"id" uri:"candidateId" bindings:"required"`
 }
 
 type PublicKey struct {
 	Key string `bson:"key" json:"key" bindings:"required"`
-	ID  int64  `bson:"id" json:"id"`
+	ID  string `bson:"id" json:"id"`
 }
 
 type PrivateKey struct {
 	Key string `bson:"key" json:"key" bindings:"required"`
-	ID  int64  `bson:"id" json:"id"`
+	ID  string `bson:"id" json:"id"`
 }
 
 type EncryptedVote struct {
