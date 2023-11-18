@@ -77,7 +77,7 @@ func main() {
 	// admin
 	electionsGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)
 	electionsGroup.POST("/create", controllers.CreateElection)
-	electionsGroup.POST("/approveCandidate/:candidateId", controllers.ApproveCandidate)
+	electionsGroup.POST("/approveCandidate/:electionId/:candidateId", controllers.ApproveCandidate)
 	electionsGroup.POST("/next/:electionId", controllers.Next)
 	electionsGroup.GET("/getAllCandidates", controllers.GetAllCandidates)
 

@@ -40,7 +40,7 @@ func (c *Candidate) Save() (*Candidate, error) {
 
 func GetCandidate(election_id string, candidate_id string) (Candidate, error) {
 	coll := DB.Database("public").Collection("candidates")
-	filter := bson.D{{Key: "userId", Value: candidate_id},
+	filter := bson.D{{Key: "id", Value: candidate_id},
 		{Key: "electionId", Value: election_id}}
 	var candidate Candidate
 	err := coll.FindOne(context.TODO(), filter).Decode(&candidate)
@@ -50,16 +50,17 @@ func GetCandidate(election_id string, candidate_id string) (Candidate, error) {
 	return candidate, nil
 }
 
-func ApproveCandidate(id string, approved bool) error {
+func ApproveCandidate(election_id string, candidate_id string, approved bool) error {
 	coll := DB.Database("public").Collection("candidates")
-	filter := bson.D{{Key: "id", Value: id}}
+	filter := bson.D{{Key: "id", Value: candidate_id},
+		{Key: "electionId", Value: election_id}}
 	update := bson.D{{Key: "$set",
 		Value: bson.D{{Key: "approved", Value: approved},
 			{Key: "waitingForApprove", Value: false}},
 	}}
 	res, err := coll.UpdateOne(context.TODO(), filter, update)
 	if res.MatchedCount == 0 {
-		return errors.New("no candidate with id `" + id + "` found")
+		return errors.New("no candidate with id `" + candidate_id + "` in election `" + election_id + "` found")
 	}
 	return err
 }

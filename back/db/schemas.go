@@ -51,7 +51,6 @@ type ElectionResults struct {
 
 type Candidate struct {
 	ID                string `bson:"id" json:"id"`
-	UserId            string `bson:"userId" json:"userId"`
 	ElectionId        string `bson:"electionId" json:"electionId"`
 	Name              string `bson:"name" json:"name" bindings:"required"`
 	PhotoUrl          string `bson:"photourl" json:"photourl" bindings:"required"`

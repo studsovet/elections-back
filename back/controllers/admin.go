@@ -61,11 +61,19 @@ func GetAllCandidates(c *gin.Context) {
 }
 
 func ApproveCandidate(c *gin.Context) {
-	var id db.CandidateId
-	if err := c.ShouldBindUri(&id); err != nil {
+	var electionId db.ElectionId
+	var candidateId db.CandidateId
+
+	if err := c.ShouldBindUri(&electionId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if err := c.ShouldBindUri(&candidateId); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	approved_str := c.Query("approved")
 	if approved_str == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `approve` param to query"})
@@ -76,7 +84,7 @@ func ApproveCandidate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "approved query parse error: " + err.Error()})
 		return
 	}
-	err = db.ApproveCandidate(id.ID, approved)
+	err = db.ApproveCandidate(electionId.ID, candidateId.ID, approved)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
