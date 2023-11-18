@@ -69,6 +69,17 @@ func ApproveCandidate(c *gin.Context) {
 		return
 	}
 
+	election, err := db.GetElection(electionId.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	if election.Status != db.Waiting {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't approve candidate as election's already started"})
+		return
+	}
+
 	if err := c.ShouldBindUri(&candidateId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
