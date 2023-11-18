@@ -65,9 +65,9 @@ func ApproveCandidate(election_id string, candidate_id string, approved bool) er
 	return err
 }
 
-func GetCandidates(candidate_id string) ([]Candidate, error) {
+func GetCandidates(election_id string) ([]Candidate, error) {
 	coll := DB.Database("public").Collection("candidates")
-	filter := bson.D{{Key: "electionId", Value: candidate_id},
+	filter := bson.D{{Key: "electionId", Value: election_id},
 		{Key: "approved", Value: true}}
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
