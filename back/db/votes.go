@@ -2,19 +2,12 @@ package db
 
 import (
 	"context"
-	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 	var err error
-
-	n, err := DB.Database("public").Collection("encrypted_votes_election_"+election_id).CountDocuments(context.TODO(), bson.D{{"voterId", v.VoterID}})
-
-	if n != 0 {
-		return nil, errors.New("already voted")
-	}
 
 	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
 	_, err = coll.InsertOne(context.TODO(), v)
