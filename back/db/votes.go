@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -11,13 +10,13 @@ import (
 func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 	var err error
 
-	n, err := DB.Database("public").Collection("encrypted_votes_election_"+fmt.Sprint(election_id)).CountDocuments(context.TODO(), bson.D{{"voterId", v.VoterID}})
+	n, err := DB.Database("public").Collection("encrypted_votes_election_"+election_id).CountDocuments(context.TODO(), bson.D{{"voterId", v.VoterID}})
 
 	if n != 0 {
 		return nil, errors.New("already voted")
 	}
 
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
 	_, err = coll.InsertOne(context.TODO(), v)
 	if err != nil {
 		return &EncryptedVote{}, err
@@ -28,7 +27,7 @@ func (v *EncryptedVote) Save(election_id string) (*EncryptedVote, error) {
 func (v *DecryptedVote) Save(election_id string) (*DecryptedVote, error) {
 	var err error
 
-	coll := DB.Database("public").Collection("decrypted_votes_election_" + fmt.Sprint(election_id))
+	coll := DB.Database("public").Collection("decrypted_votes_election_" + election_id)
 	_, err = coll.InsertOne(context.TODO(), v)
 	if err != nil {
 		return &DecryptedVote{}, err
@@ -37,11 +36,11 @@ func (v *DecryptedVote) Save(election_id string) (*DecryptedVote, error) {
 }
 
 func DropEncryptedVotes(election_id string) error {
-	return DB.Database("public").Collection("decrypted_votes_election_" + fmt.Sprint(election_id)).Drop(context.TODO())
+	return DB.Database("public").Collection("decrypted_votes_election_" + election_id).Drop(context.TODO())
 }
 
 func IsVoted(election_id string, voter_id string) (bool, error) {
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
 
 	filter := bson.D{{Key: "voterId", Value: voter_id}}
 	count, err := coll.CountDocuments(context.TODO(), filter)
@@ -55,7 +54,7 @@ func IsVoted(election_id string, voter_id string) (bool, error) {
 }
 
 func GetEncryptedVotes(election_id string) ([]EncryptedVote, error) {
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + fmt.Sprint(election_id))
+	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
 	cursor, err := coll.Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		return []EncryptedVote{}, err
