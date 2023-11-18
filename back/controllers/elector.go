@@ -70,7 +70,7 @@ func GetElection(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	// TODO, if status is draft then check if a person is admin
 	voted, err := db.IsVoted(election.ID, voter_id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -84,6 +84,7 @@ func GetElection(c *gin.Context) {
 func GetFilteredElections(c *gin.Context) {
 	return_voted := false
 	status := c.Query("status")
+	// TODO, if status is draft then check if a person is admin
 	if status == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `status` param to query"})
 		return
