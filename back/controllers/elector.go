@@ -54,19 +54,56 @@ func GetElection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, election)
-}
-
-func GetFilteredElections(c *gin.Context) {
-	elections, err := db.GetElections()
+	voter_id, err := token.ExtractTokenID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var elections_id []string
+
+	voted, err := db.IsVoted(election.ID, voter_id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	election.IsVoted = voted
+
+	c.JSON(http.StatusOK, election)
+}
+
+func GetFilteredElections(c *gin.Context) {
+	return_voted := false
+	status := c.Query("status")
+	if status == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `status` param to query"})
+		return
+	} else if status == db.Voted {
+		return_voted = true
+		status = db.Started
+	}
+	elections, err := db.GetElections(status)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	voter_id, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	elections_id := []string{}
 	for _, e := range elections {
-		if e.Status != db.Draft { // TODO move to mongo
+		if status != db.Started {
 			elections_id = append(elections_id, e.ID)
+		} else {
+			voted, err := db.IsVoted(e.ID, voter_id)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if (return_voted && voted) || (!return_voted && !voted) {
+				elections_id = append(elections_id, e.ID)
+			}
 		}
 	}
 

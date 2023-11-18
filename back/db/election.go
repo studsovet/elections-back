@@ -31,9 +31,14 @@ func GetElection(id string) (Election, error) {
 	return election, nil
 }
 
-func GetElections() ([]Election, error) {
+func GetElections(status string) ([]Election, error) {
 	coll := DB.Database("public").Collection("elections")
-	filter := bson.D{{}}
+	var filter bson.D
+	if status == "all" {
+		filter = bson.D{{}}
+	} else {
+		filter = bson.D{{"status", status}}
+	}
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		return []Election{}, err
@@ -43,6 +48,9 @@ func GetElections() ([]Election, error) {
 	err = cursor.All(context.TODO(), &elections)
 	if err != nil {
 		return []Election{}, err
+	}
+	if elections == nil {
+		return []Election{}, nil
 	}
 	return elections, nil
 }

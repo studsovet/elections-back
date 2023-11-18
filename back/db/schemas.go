@@ -43,6 +43,7 @@ type Election struct {
 	StartTime                       string  `bson:"startTime" json:"startTime" bindings:"required"`
 	FinishTime                      string  `bson:"finishTime" json:"finishTime"`
 	Status                          string  `bson:"status" json:"status" bindings:"required"`
+	IsVoted                         bool    `json:"IsVoted"`
 }
 
 type ElectionResults struct {
@@ -91,6 +92,7 @@ const (
 	Created   = "created"
 	Waiting   = "waiting"
 	Started   = "started"
+	Voted     = "voted" // Not used in Statuses, as this status is different for different users
 	Finished  = "finished"
 	Decrypted = "decrypted"
 	Results   = "results"
