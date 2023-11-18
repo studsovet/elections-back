@@ -33,6 +33,17 @@ func GetCandidates(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	election, err := db.GetElection(election_id.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	if election.Status == db.Draft || election.Status == db.Created || election.Status == db.Waiting {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't see candidates of not started election"})
+		// we don't want candidates to look up on each other in order to steal program etc...
+	}
 	candidates, err := db.GetCandidates(election_id.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
