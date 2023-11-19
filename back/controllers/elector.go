@@ -3,6 +3,8 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"elections-back/db"
 
@@ -17,6 +19,20 @@ func GetPublicKey(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	election, err := db.GetElection(election_id.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	allowed_statuses := []string{"started", "finished", "decrypted", "results"}
+	if !slices.Contains(allowed_statuses, election.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't see public key in status `" + election.Status +
+			"`, allowed are `" + strings.Join(allowed_statuses, ", ") + "`"})
+		return
+	}
+
 	key, err := db.GetPublicKey(election_id.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
