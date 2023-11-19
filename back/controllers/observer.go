@@ -3,7 +3,10 @@ package controllers
 import (
 	"elections-back/db"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"slices"
+	"strings"
 
 	token "elections-back/utils"
 
@@ -84,21 +87,33 @@ func SetPrivateKey(c *gin.Context) {
 */
 
 func PostSavePrivateKey(c *gin.Context) {
-	// TODO: make it available only in the finished state
-
-	var id db.ElectionId
-	if err := c.ShouldBindUri(&id); err != nil {
+	var electionId db.ElectionId
+	if err := c.ShouldBindUri(&electionId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var private_key db.PrivateKey
-	private_key.Key = c.Query("key")
-	private_key.ID = id.ID
-	if private_key.Key == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `key` in query"})
+	election, err := db.GetElection(electionId.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
 		return
 	}
+
+	allowed_statuses := []string{"finished"}
+	if !slices.Contains(allowed_statuses, election.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't save private key in status `" + election.Status +
+			"`, allowed are `" + strings.Join(allowed_statuses, ", ") + "`"})
+		return
+	}
+
+	var private_key db.PrivateKey
+	key_bytes, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	private_key.Key = string(key_bytes[:])
+	private_key.ID = electionId.ID
 
 	privateKey, err := token.ParsePrivateKey(private_key.Key)
 	if err != nil {
