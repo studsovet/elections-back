@@ -4,6 +4,7 @@ import (
 	"elections-back/db"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -34,13 +35,14 @@ func SetPublicKey(c *gin.Context) {
 		return
 	}
 	var public_key db.PublicKey
-	public_key.Key = c.Query("key")
-	if public_key.Key == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `key` in query"})
+	key_bytes, err := ioutil.ReadAll(c.Request.Body)
+	public_key.Key = string(key_bytes[:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	_, err := token.ParsePublicKey(public_key.Key)
+	_, err = token.ParsePublicKey(public_key.Key)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
 		return
