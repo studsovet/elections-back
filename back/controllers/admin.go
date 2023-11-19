@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"slices"
 	"strconv"
+	"strings"
 
 	token "elections-back/utils"
 
@@ -27,13 +29,25 @@ func CreateElection(c *gin.Context) {
 }
 
 func SetPublicKey(c *gin.Context) {
-	// TODO: make it available only in the waiting state
-
-	var id db.ElectionId
-	if err := c.ShouldBindUri(&id); err != nil {
+	var electionId db.ElectionId
+	if err := c.ShouldBindUri(&electionId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	election, err := db.GetElection(electionId.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	allowed_statuses := []string{"draft", "created", "waiting"}
+	if !slices.Contains(allowed_statuses, election.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't set key in status `" + election.Status +
+			"`, allowed are `" + strings.Join(allowed_statuses, ", ") + "`"})
+		return
+	}
+
 	var public_key db.PublicKey
 	key_bytes, err := ioutil.ReadAll(c.Request.Body)
 	public_key.Key = string(key_bytes[:])
@@ -48,7 +62,7 @@ func SetPublicKey(c *gin.Context) {
 		return
 	}
 
-	public_key.ID = id.ID
+	public_key.ID = electionId.ID
 	print("key", public_key.ID, public_key.Key)
 	public_key.Save()
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
