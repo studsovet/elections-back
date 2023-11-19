@@ -4,6 +4,7 @@ import (
 	middlewares "elections-back/middleware"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"elections-back/controllers"
@@ -15,6 +16,12 @@ func main() {
 
 	r := gin.Default()
 	r.Use(middlewares.TokenAuthMiddleware)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowCredentials: true,
+	}))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",

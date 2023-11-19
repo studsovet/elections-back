@@ -75,15 +75,6 @@ func ObserverAuthMiddleware() gin.HandlerFunc {
 */
 
 func TokenAuthMiddleware(c *gin.Context) {
-	c.Writer.Header().Add("Access-Control-Allow-Origin", "*")
-	c.Writer.Header().Add("Access-Control-Allow-Headers", "Content-Type")
-	c.Writer.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
-	if c.Request.Method == "OPTIONS" {
-		c.AbortWithStatus(200)
-		return
-	}
-
 	if (c.Request.Method == "GET" && (c.Request.URL.Path == "/ping" || c.Request.URL.Path == "/auth/elk")) ||
 		(c.Request.Method == "POST" && c.Request.URL.Path == "/auth/redirect") {
 		c.Next()
