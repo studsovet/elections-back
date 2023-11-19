@@ -50,11 +50,11 @@ func SetPublicKey(c *gin.Context) {
 
 	var public_key db.PublicKey
 	key_bytes, err := ioutil.ReadAll(c.Request.Body)
-	public_key.Key = string(key_bytes[:])
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	public_key.Key = string(key_bytes[:])
 
 	_, err = token.ParsePublicKey(public_key.Key)
 	if err != nil {
