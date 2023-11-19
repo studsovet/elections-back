@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"elections-back/db"
 	token "elections-back/utils"
 	"fmt"
 
@@ -93,5 +94,39 @@ func TokenAuthMiddleware(c *gin.Context) {
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	c.Set("claims", claims)
+	c.Next()
+}
+
+func AdminAuthMiddleware(c *gin.Context) {
+	id, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
+		return
+	}
+	is_admin, err := db.IsAdmin(id)
+	if err != nil {
+		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
+		return
+	}
+	if !is_admin {
+		c.AbortWithStatusJSON(403, gin.H{"error": "Not admin"})
+	}
+	c.Next()
+}
+
+func ObserverAuthMiddleware(c *gin.Context) {
+	id, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
+		return
+	}
+	is_observer, err := db.IsObserver(id)
+	if err != nil {
+		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
+		return
+	}
+	if !is_observer {
+		c.AbortWithStatusJSON(403, gin.H{"error": "Not observer"})
+	}
 	c.Next()
 }

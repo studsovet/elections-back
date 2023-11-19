@@ -81,12 +81,29 @@ func GetElection(c *gin.Context) {
 		return
 	}
 
+	if election.Status == db.Draft {
+		id, err := token.ExtractTokenID(c)
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		is_admin, err := db.IsAdmin(id)
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		if !is_admin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "not admin"})
+			return
+		}
+	}
+
 	voter_id, err := token.ExtractTokenID(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// TODO, if status is draft then check if a person is admin
+
 	voted, err := db.IsVoted(election.ID, voter_id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -100,7 +117,24 @@ func GetElection(c *gin.Context) {
 func GetFilteredElections(c *gin.Context) {
 	return_voted := false
 	status := c.Query("status")
-	// TODO, if status is draft then check if a person is admin
+
+	if status == db.Draft {
+		id, err := token.ExtractTokenID(c)
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		is_admin, err := db.IsAdmin(id)
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		if !is_admin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "not admin"})
+			return
+		}
+	}
+
 	if status == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `status` param to query"})
 		return
@@ -188,6 +222,20 @@ func GetEncryptedVotes(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	election, err := db.GetElection(election_id.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	allowed_statuses := []string{"started", "finished", "decrypted", "results"}
+	if !slices.Contains(allowed_statuses, election.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't see votes in status `" + election.Status +
+			"`, allowed are `" + strings.Join(allowed_statuses, ", ") + "`"})
+		return
+	}
+
 	votes, err := db.GetEncryptedVotes(election_id.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
