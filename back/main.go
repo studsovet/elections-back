@@ -79,14 +79,18 @@ func main() {
 	electionsGroup.GET("/publicKey/:electionId", controllers.GetPublicKey)
 
 	// observer
-	electionsGroup.POST("/setPrivateKey/:electionId", controllers.PostSavePrivateKey)
+	observerGroup := r.Group("/observer")
+	observerGroup.Use(middlewares.ObserverAuthMiddleware)
+	observerGroup.POST("/setPrivateKey/:electionId", controllers.PostSavePrivateKey)
 
 	// admin
-	electionsGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)
-	electionsGroup.POST("/create", controllers.CreateElection)
-	electionsGroup.POST("/approveCandidate/:electionId/:candidateId", controllers.ApproveCandidate)
-	electionsGroup.POST("/next/:electionId", controllers.Next)
-	electionsGroup.GET("/getAllCandidates", controllers.GetAllCandidates)
+	adminGroup := r.Group("/admin")
+	adminGroup.Use(middlewares.AdminAuthMiddleware)
+	adminGroup.POST("/setPublicKey/:electionId", controllers.SetPublicKey)
+	adminGroup.POST("/create", controllers.CreateElection)
+	adminGroup.POST("/approveCandidate/:electionId/:candidateId", controllers.ApproveCandidate)
+	adminGroup.POST("/next/:electionId", controllers.Next)
+	adminGroup.GET("/getAllCandidates", controllers.GetAllCandidates)
 
 	dictionariesGroup := r.Group("/dictionaries")
 
