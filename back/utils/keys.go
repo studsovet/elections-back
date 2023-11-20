@@ -3,7 +3,6 @@ package token
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
 )
@@ -25,8 +24,7 @@ func IsKeyMatched(publicKey any, privateKey *rsa.PrivateKey) bool {
 }
 
 func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, error) {
-	hash := sha512.New()
-	plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
+	plaintext, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 	if err != nil {
 		return nil, err
 	}

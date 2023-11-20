@@ -176,29 +176,29 @@ func Next(c *gin.Context) {
 			return
 		}
 
+		dbPrivateKey, err := db.GetPrivateKey(id.ID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+			return
+		}
+
+		privateKey, err := token.ParsePrivateKey(dbPrivateKey.Key)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err), "message": "bad private key"})
+			return
+		}
+
 		for _, vote := range votes {
 			encodedVote, err := base64.StdEncoding.DecodeString(vote.Vote)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
-				return
-			}
-
-			dbPrivateKey, err := db.GetPrivateKey(id.ID)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
-				return
-			}
-
-			privateKey, err := token.ParsePrivateKey(dbPrivateKey.Key)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err), "message": "bad base64"})
 				return
 			}
 
 			var decryptedVote db.DecryptedVote
 			tmpBytes, err := token.DecryptWithPrivateKey(encodedVote, privateKey)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err), "message": "was used wrong public key"})
 				return
 			}
 
