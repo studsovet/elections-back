@@ -58,6 +58,7 @@ func GetCandidates(c *gin.Context) {
 
 	if election.Status == db.Draft || election.Status == db.Created || election.Status == db.Waiting {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "can't see candidates of not started election"})
+		return
 		// we don't want candidates to look up on each other in order to steal program etc...
 	}
 	candidates, err := db.GetCandidates(election_id.ID)
