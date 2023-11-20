@@ -116,7 +116,6 @@ func GetElection(c *gin.Context) {
 }
 
 func GetFilteredElections(c *gin.Context) {
-	return_voted := false
 	status := c.Query("status")
 
 	if status == db.Draft {
@@ -139,10 +138,8 @@ func GetFilteredElections(c *gin.Context) {
 	if status == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "provide `status` param to query"})
 		return
-	} else if status == db.Voted {
-		return_voted = true
-		status = db.Started
 	}
+
 	elections, err := db.GetElections(status)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -155,22 +152,19 @@ func GetFilteredElections(c *gin.Context) {
 	}
 
 	elections_id := []string{}
+	elections_mask := []bool{}
 	for _, e := range elections {
-		if status != db.Started {
-			elections_id = append(elections_id, e.ID)
-		} else {
-			voted, err := db.IsVoted(e.ID, voter_id)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			if (return_voted && voted) || (!return_voted && !voted) {
-				elections_id = append(elections_id, e.ID)
-			}
+		voted, err := db.IsVoted(e.ID, voter_id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
+
+		elections_id = append(elections_id, e.ID)
+		elections_mask = append(elections_mask, voted)
 	}
 
-	c.JSON(http.StatusOK, elections_id)
+	c.JSON(http.StatusOK, gin.H{"electionIds": elections_id, "electionMask": elections_mask})
 }
 
 func PostVote(c *gin.Context) {
@@ -192,12 +186,13 @@ func PostVote(c *gin.Context) {
 		return
 	}
 
-	if vote.VoterID, err = token.ExtractTokenID(c); err != nil {
+	var voterID string
+	if voterID, err = token.ExtractTokenID(c); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	voted, err := db.IsVoted(election_id.ID, vote.VoterID)
+	voted, err := db.IsVoted(election_id.ID, voterID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -214,6 +209,9 @@ func PostVote(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	db.SetVoted(election_id.ID, voterID)
+
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 

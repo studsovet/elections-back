@@ -33,9 +33,9 @@ func DropEncryptedVotes(election_id string) error {
 }
 
 func IsVoted(election_id string, voter_id string) (bool, error) {
-	coll := DB.Database("public").Collection("encrypted_votes_election_" + election_id)
+	coll := DB.Database("public").Collection("alreadyVoted")
 
-	filter := bson.D{{Key: "voterId", Value: voter_id}}
+	filter := bson.D{{Key: "voterId", Value: voter_id}, {Key: "electionId", Value: election_id}}
 	count, err := coll.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return false, err
@@ -44,6 +44,13 @@ func IsVoted(election_id string, voter_id string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func SetVoted(election_id string, voter_id string) {
+	coll := DB.Database("public").Collection("alreadyVoted")
+
+	elem := bson.D{{Key: "voterId", Value: voter_id}, {Key: "electionId", Value: election_id}}
+	coll.InsertOne(context.TODO(), elem)
 }
 
 func GetEncryptedVotes(election_id string) ([]EncryptedVote, error) {
