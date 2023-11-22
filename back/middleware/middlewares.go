@@ -2,8 +2,10 @@ package middlewares
 
 import (
 	"elections-back/db"
+	"elections-back/utils"
 	token "elections-back/utils"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -82,7 +84,7 @@ func TokenAuthMiddleware(c *gin.Context) {
 		return
 	}
 	bearerToken := token.ExtractToken(c)
-	fmt.Println(bearerToken)
+	//fmt.Println(bearerToken)
 	if bearerToken == "" {
 		c.AbortWithStatusJSON(401, gin.H{"error": "token not found"})
 		return
@@ -94,6 +96,11 @@ func TokenAuthMiddleware(c *gin.Context) {
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	c.Set("claims", claims)
+	err = utils.GetSaveStudentData(c, bearerToken)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
 	c.Next()
 }
 
