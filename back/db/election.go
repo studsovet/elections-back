@@ -7,7 +7,7 @@ import (
 )
 
 func (e *Election) Save() (*Election, error) {
-	_, err := DB.Database("public").Collection("elections").DeleteMany(context.TODO(), bson.D{{"id", e.ID}})
+	_, err := DB.Database("public").Collection("elections").DeleteMany(context.TODO(), bson.D{{Key: "id", Value: e.ID}})
 
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func GetElections(status string) ([]Election, error) {
 	if status == "all" {
 		filter = bson.D{{}}
 	} else {
-		filter = bson.D{{"status", status}}
+		filter = bson.D{{Key: "status", Value: status}}
 	}
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
