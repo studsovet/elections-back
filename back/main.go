@@ -74,7 +74,7 @@ func main() {
 	electionsGroup.GET("/get/:electionId", controllers.GetElection)
 	electionsGroup.GET("/getCandidates/:electionId", controllers.GetCandidates)
 	electionsGroup.GET("/getVoices/:electionId", controllers.GetEncryptedVotes)
-	electionsGroup.GET("/getResults/:electionId", controllers.ElectionNotImplemented)
+	electionsGroup.GET("/getResults/:electionId", controllers.GetResults)
 	electionsGroup.POST("/vote/:electionId", controllers.PostVote)
 	electionsGroup.GET("/publicKey/:electionId", controllers.GetPublicKey)
 

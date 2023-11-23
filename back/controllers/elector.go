@@ -192,12 +192,14 @@ func PostVote(c *gin.Context) {
 		return
 	}
 
-	if vote.VoterID, err = token.ExtractTokenID(c); err != nil {
+	var voterID string
+
+	if voterID, err = token.ExtractTokenID(c); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	voted, err := db.IsVoted(election_id.ID, vote.VoterID)
+	voted, err := db.IsVoted(election_id.ID, voterID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -214,6 +216,9 @@ func PostVote(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	db.SetVoted(election_id.ID, voterID)
+
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
@@ -243,9 +248,36 @@ func GetEncryptedVotes(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, votes)
-
 }
 
 func ElectionNotImplemented(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented!"})
+}
+
+func GetResults(c *gin.Context) {
+	var election_id db.ElectionId
+	if err := c.ShouldBindUri(&election_id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	election, err := db.GetElection(election_id.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprint(err)})
+		return
+	}
+
+	allowed_statuses := []string{"decrypted", "results"}
+	if !slices.Contains(allowed_statuses, election.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "can't see votes in status `" + election.Status +
+			"`, allowed are `" + strings.Join(allowed_statuses, ", ") + "`"})
+		return
+	}
+
+	votes, err := db.GetDecryptedVotes(election_id.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, votes)
 }

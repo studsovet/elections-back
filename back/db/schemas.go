@@ -79,8 +79,7 @@ type PrivateKey struct {
 }
 
 type EncryptedVote struct {
-	Vote    string `bson:"vote" json:"vote" bindings:"required"`
-	VoterID string `bson:"voterId"`
+	Vote string `bson:"vote" json:"vote" bindings:"required"`
 }
 
 type DecryptedVote struct {
