@@ -1,7 +1,7 @@
 services:
   mongodb:
     container_name: mongodb
-    image: mongo
+    image: mongo:7.0.3
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
@@ -10,7 +10,7 @@ services:
       - mongodata:/data/db
   mongo-express:
     container_name: mongo-express
-    image: mongo-express
+    image: mongo-express:1.0.0-20-alpine3.18
     restart: always
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
