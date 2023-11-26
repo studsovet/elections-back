@@ -96,7 +96,7 @@ func TokenAuthMiddleware(c *gin.Context) {
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	c.Set("claims", claims)
-	err = utils.GetSaveStudentData(c, bearerToken)
+	err = utils.GetSaveElectorData(c, bearerToken)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprint(err)})
 		return

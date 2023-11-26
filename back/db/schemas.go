@@ -1,17 +1,17 @@
 package db
 
 type Elector struct {
-	ID                     string  `bson:"id" json:"id" bindings:"required"`
-	FullName               string  `bson:"fullname" json:"fullname"`
-	Email                  string  `bson:"email" json:"email" bindings:"required"`
-	IsDormitoryStudent     bool    `bson:"isDormitoryStudent" json:"isDormitoryStudent" bindings:"required"`
-	DormitoryId            int64   `bson:"dormitoryId" json:"dormitoryId"`
-	FacultyIds             []int64 `bson:"facultyIds" json:"facultyIds" bindings:"required"`
-	IsCouncil              bool    `bson:"isCouncil" json:"isCouncil" bindings:"required"`
-	CouncilOrganizationIds []int64 `bson:"councilOrganizationIds" json:"councilOrganizationIds"`
-	IsPostGraduate         bool    `bson:"isPostGraduate" json:"isPostGraduate" bindings:"required"`
-	IsNearForeign          bool    `bson:"isNearForeign" json:"isNearForeign" bindings:"required"`
-	IsFarForeign           bool    `bson:"isFarForeign" json:"isFarForeign" bindings:"required"`
+	ID                     string   `bson:"id" json:"id" bindings:"required"`
+	FullName               string   `bson:"fullname" json:"fullname"`
+	Email                  string   `bson:"email" json:"email" bindings:"required"`
+	IsDormitoryStudent     bool     `bson:"isDormitoryStudent" json:"isDormitoryStudent" bindings:"required"`
+	DormitoryId            string   `bson:"dormitoryId" json:"dormitoryId"`
+	FacultyIds             []string `bson:"facultyIds" json:"facultyIds" bindings:"required"`
+	IsCouncil              bool     `bson:"isCouncil" json:"isCouncil" bindings:"required"`
+	CouncilOrganizationIds []string `bson:"councilOrganizationIds" json:"councilOrganizationIds"`
+	IsPostGraduate         bool     `bson:"isPostGraduate" json:"isPostGraduate" bindings:"required"`
+	IsNearForeign          bool     `bson:"isNearForeign" json:"isNearForeign" bindings:"required"`
+	IsFarForeign           bool     `bson:"isFarForeign" json:"isFarForeign" bindings:"required"`
 }
 
 type Faculty struct {
