@@ -120,7 +120,7 @@ func GetFilteredElections(c *gin.Context) {
 	status := c.Query("status")
 
 	if status == db.Draft {
-		id, err := token.ExtractTokenID(c)
+		id, err := token.ExtractTokenEmail(c)
 		if err != nil {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
