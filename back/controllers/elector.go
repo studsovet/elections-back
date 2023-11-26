@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"sort"
 	"strings"
 
 	"elections-back/db"
@@ -154,6 +155,9 @@ func GetFilteredElections(c *gin.Context) {
 		return
 	}
 
+	sort.Slice(elections, func(i, j int) bool {
+		return elections[i].Priority < elections[j].Priority
+	})
 	elections_id := []string{}
 	for _, e := range elections {
 		if status != db.Started {
