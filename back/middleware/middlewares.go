@@ -105,7 +105,7 @@ func TokenAuthMiddleware(c *gin.Context) {
 }
 
 func AdminAuthMiddleware(c *gin.Context) {
-	id, err := token.ExtractTokenID(c)
+	id, err := token.ExtractTokenEmail(c)
 	if err != nil {
 		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
 		return
@@ -122,7 +122,7 @@ func AdminAuthMiddleware(c *gin.Context) {
 }
 
 func ObserverAuthMiddleware(c *gin.Context) {
-	id, err := token.ExtractTokenID(c)
+	id, err := token.ExtractTokenEmail(c)
 	if err != nil {
 		c.AbortWithStatusJSON(403, gin.H{"error": err.Error()})
 		return

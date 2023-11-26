@@ -53,6 +53,7 @@ type ElectionResults struct {
 type Candidate struct {
 	ID                string `bson:"id" json:"id"`
 	ElectionId        string `bson:"electionId" json:"electionId"`
+	Email             string `bson:"email" json:"email"` // This field is filled only for admin.
 	Name              string `bson:"name" json:"name" bindings:"required"`
 	PhotoUrl          string `bson:"photourl" json:"photourl" bindings:"required"`
 	Description       string `bson:"description" json:"description" bindings:"required"`
@@ -85,6 +86,11 @@ type EncryptedVote struct {
 
 type DecryptedVote struct {
 	Vote string `bson:"vote" json:"vote" bindings:"required"`
+}
+
+type UserId struct {
+	Email string `bson:"email"`
+	ID    string `bson:"id"`
 }
 
 const (

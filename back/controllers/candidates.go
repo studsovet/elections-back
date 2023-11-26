@@ -38,6 +38,7 @@ func BecomeCandidate(c *gin.Context) {
 
 	candidate.Approved = false
 	candidate.WaitingForApprove = true
+	candidate.Email = ""
 
 	_, err = candidate.Save()
 	if err != nil {

@@ -72,6 +72,15 @@ func GetAllCandidates(c *gin.Context) {
 	candidates, err := db.GetAllCandidates()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	for i, candidate := range candidates {
+		email, err := db.ID2Email(candidate.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		candidates[i].Email = email
 	}
 	c.JSON(http.StatusOK, candidates)
 }

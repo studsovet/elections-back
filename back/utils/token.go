@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"elections-back/db"
 	"errors"
 	"os"
 	"strings"
@@ -30,7 +31,7 @@ func ExtractToken(c *gin.Context) string {
 	return ""
 }
 
-func ExtractTokenID(c *gin.Context) (string, error) {
+func ExtractTokenEmail(c *gin.Context) (string, error) {
 	tokenString := ExtractToken(c)
 	token, err := VerifyHSEToken(tokenString)
 
@@ -51,6 +52,18 @@ func ExtractTokenID(c *gin.Context) (string, error) {
 		return "", errors.New("wrong token")
 	}
 	return "", errors.New("wrong token")
+}
+
+func ExtractTokenID(c *gin.Context) (string, error) {
+	email, err := ExtractTokenEmail(c)
+	if err != nil {
+		return "", err
+	}
+	ID, err := db.Email2ID(email)
+	if err != nil {
+		return "", err
+	}
+	return ID, nil
 }
 
 func VerifyHSEToken(t string) (*jwt.Token, error) {

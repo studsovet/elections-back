@@ -9,7 +9,7 @@ import (
 )
 
 func GetSaveStudentData(c *gin.Context, token string) error {
-	email, err := ExtractTokenID(c)
+	email, err := ExtractTokenEmail(c)
 	// TODO check if saved
 	if err != nil {
 		return err
